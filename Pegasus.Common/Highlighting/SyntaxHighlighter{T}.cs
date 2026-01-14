@@ -177,7 +177,7 @@ namespace Pegasus.Common.Highlighting
             return simplified;
         }
 
-        private Tuple<int, T> Highlight(string key, int? maxRule = null)
+        private Common.Tuple<int, T> Highlight(string key, int? maxRule = null)
         {
             if (maxRule.HasValue && (maxRule.Value > this.list.Count || maxRule.Value < 0))
             {
@@ -192,7 +192,7 @@ namespace Pegasus.Common.Highlighting
 
                 if (rule.Pattern.IsMatch(key))
                 {
-                    return Tuple.Create(i, rule.Value);
+                    return Common.Tuple.Create(i, rule.Value);
                 }
             }
 
@@ -208,7 +208,7 @@ namespace Pegasus.Common.Highlighting
                 return highlighted;
             }
 
-            var lexicalStack = new Stack<Tuple<int, LexicalElement>>();
+            var lexicalStack = new Stack<Common.Tuple<int, LexicalElement>>();
             foreach (var e in lexicalElements.Reverse().Where(e => e.StartCursor.Location != e.EndCursor.Location))
             {
                 int? maxRule = null;
@@ -235,14 +235,14 @@ namespace Pegasus.Common.Highlighting
                     continue;
                 }
 
-                lexicalStack.Push(Tuple.Create(maxRule ?? this.list.Count, e));
+                lexicalStack.Push(Common.Tuple.Create(maxRule ?? this.list.Count, e));
                 var key = string.Join(" ", lexicalStack.Select(d => d.Item2.Name).ToArray());
                 var result = this.Highlight(key, maxRule);
 
                 if (result != null)
                 {
                     lexicalStack.Pop();
-                    lexicalStack.Push(Tuple.Create(result.Item1, e));
+                    lexicalStack.Push(Common.Tuple.Create(result.Item1, e));
                     highlighted.Add(new HighlightedSegment<T>(e.StartCursor.Location, e.EndCursor.Location, result.Item2));
                 }
             }
