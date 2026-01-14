@@ -1,0 +1,1366 @@
+title Mind Force - v0.7
+author caogtaa@gmail.com
+
+key_repeat_interval 0.4
+again_interval 0.16
+run_rules_on_level_start
+
+level_select
+continue_is_level_select 
+
+(verbose_logging)
+
+========
+TAGS
+========
+
+Shapes = O None HH VV U_E D_E L_E R_E UL_C UR_C DL_C DR_C UL UR DL DR L R U D
+SimpleShapes = O HH VV L R U D
+
+========
+OBJECTS
+========
+
+Background
+(#A3FFFF)
+#dadad8
+
+Wall
+gray darkgray
+00010
+11111
+01000
+11111
+00010
+
+Human
+black #FFD9BF white blue
+.000.
+.111.
+22222
+.333.
+.3.3.
+
+DeadHuman
+black #FFD9BF red Blue
+.020.
+.222.
+22222
+.222.
+.2.2.
+
+Exit
+#71451d black 
+.000.
+01110
+01110
+01110
+01110
+
+Crate:O
+orange
+00000
+0...0
+0...0
+0...0
+00000
+
+Crate:HH (Horizontal)
+orange
+00000
+.....
+.....
+.....
+00000
+
+Crate:VV (Vertical)
+orange
+0...0
+0...0
+0...0
+0...0
+0...0
+
+Crate:None (Empty)
+transparent
+
+Crate:U_E
+orange
+00000
+.....
+.....
+.....
+0...0
+
+Crate:D_E
+orange
+0...0
+.....
+.....
+.....
+00000
+
+Crate:L_E
+orange
+0...0
+0....
+0....
+0....
+0...0
+
+Crate:R_E
+orange
+0...0
+....0
+....0
+....0
+0...0
+
+Crate:UL_C
+orange
+00000
+0....
+0....
+0....
+0...0
+
+Crate:UR_C
+orange
+00000
+....0
+....0
+....0
+0...0
+
+Crate:DL_C
+orange
+0...0
+0....
+0....
+0....
+00000
+
+Crate:DR_C
+orange
+0...0
+....0
+....0
+....0
+00000
+
+Crate:UL
+orange
+00000
+0....
+0....
+0....
+0....
+
+Crate:UR
+orange
+00000
+....0
+....0
+....0
+....0
+
+Crate:DL
+orange
+0....
+0....
+0....
+0....
+00000
+
+Crate:DR
+orange
+....0
+....0
+....0
+....0
+00000
+
+Crate:L
+orange
+00000
+0....
+0....
+0....
+00000
+
+Crate:R
+orange
+00000
+....0
+....0
+....0
+00000
+
+Crate:U
+orange
+00000
+0...0
+0...0
+0...0
+0...0
+
+Crate:D
+orange
+0...0
+0...0
+0...0
+0...0
+00000
+
+Stone:SimpleShapes
+blue
+copy:Crate:SimpleShapes
+
+Spike
+gray white
+..0..
+..0..
+.010.
+.001.
+00001
+
+Lava
+#bc3d17 #deaf43 #f3f580
+.....
+00101
+01200
+10012
+21001
+
+
+Aim
+#1dc116
+..0..
+..0..
+00000
+..0..
+..0..
+
+CMark (Control Mark，和被控制物体在相同图层，暂时样子和Aim一样)
+#1dc116
+..0..
+..0..
+00.00
+..0..
+..0..
+
+
+CMark_Spread
+transparent
+
+HumanJumpRight
+transparent
+
+HumanJumpLeft
+transparent
+
+JumpableChecker
+transparent
+
+JumpDoneMarker
+transparent
+
+Flag_MoveStopped
+transparent
+
+RMark (Rotation Mark)
+transparent
+
+is_falling
+transparent
+
+Temp
+transparent
+
+Cwize (Clockwize)
+transparent
+
+Awize (Anticlocksize)
+transparent
+
+HumanMoveLeft
+transparent
+
+HumanMoveRight
+transparent
+
+is_moving
+transparent
+
+(CMark is center)
+(支持[-2,2]区间全范围，支持中心轴往外延申到-3和+3，以便支持1x4长条旋转)
+U_3
+transparent
+U_2
+transparent
+U_1
+transparent
+U0
+transparent
+U1
+transparent
+U2
+transparent
+U3
+transparent
+R_3
+transparent
+R_2
+transparent
+R_1
+transparent
+R0
+transparent
+R1
+transparent
+R2
+transparent
+R3
+transparent
+
+prop_conn_u
+transparent
+prop_conn_d
+transparent
+prop_conn_l
+transparent
+prop_conn_r
+transparent
+prop_conn_none
+transparent
+
+
+=======
+LEGEND
+=======
+
+. = Background
+# = Wall
+P = Human
+O = Crate:O
+E = Exit
+* = Spike
+~ = Lava
+
+(
+https://en.wikipedia.org/wiki/Box-drawing_characters
+https://en.wikipedia.org/wiki/Geometric_Shapes_(Unicode_block)
+)
+
+x = Crate:None
+═ = Crate:HH
+║ = Crate:VV
+‾ = Crate:U_E (Overline)
+_ = Crate:D_E
+⎸ = Crate:L_E
+⎹ = Crate:R_E
+╔ = Crate:UL_C
+╗ = Crate:UR_C
+╚ = Crate:DL_C
+╝ = Crate:DR_C
+┏ = Crate:UL
+┓ = Crate:UR
+┗ = Crate:DL
+┛ = Crate:DR
+c = Crate:L
+ↄ = Crate:R
+n = Crate:U
+u = Crate:D
+
+Q = Stone:O
+M = Stone:U
+W = Stone:D
+{ = Stone:L
+} = Stone:R
+╤ = Stone:HH
+╞ = Stone:VV
+
+
+Player = Human or Aim
+HumanJump = HumanJumpLeft or HumanJumpRight
+crate_pipe = Crate:HH or Crate:VV
+crate_edge = Crate:U_E or Crate:D_E or Crate:L_E or Crate:R_E
+crate_corner = Crate:UL_C or Crate:UR_C or Crate:DL_C or Crate:DR_C
+(crate_part = Crate:O or Crate:UL or Crate:UR or Crate:DL or Crate:DR or Crate:L or Crate:R or Crate:U or Crate:D or crate_corner or crate_edge or crate_pipe or Crate:None)
+crate_part = Crate:Shapes
+Holdable = crate_part or Spike   (holdable专指尚未被控制的物体)
+
+is_rotating = Cwize or Awize
+position = U_2 or U_1 or U0 or U1 or U2 or R_2 or R_1 or R0 or R1 or R2 or U_3 or U3 or R_3 or R3
+U_ANY = U_2 or U_1 or U0 or U1 or U2 or U_3 or U3
+
+(每个部位赋予连接属性)
+Conn_U = Crate:DL or Crate:DR or Crate:D or Crate:DL_C or Crate:DR_C or Crate:None or Crate:VV or Crate:D_E or Crate:L_E or Crate:R_E or Stone:D or Stone:VV
+Conn_D = Crate:UL or Crate:UR or Crate:U or Crate:UL_C or Crate:UR_C or Crate:None or Crate:VV or Crate:U_E or Crate:L_E or Crate:R_E or Stone:U or Stone:VV
+Conn_L = Crate:UR or Crate:DR or Crate:R or Crate:UR_C or Crate:DR_C or Crate:None or Crate:HH or Crate:U_E or Crate:D_E or Crate:R_E or Stone:R or Stone:HH
+Conn_R = Crate:UL or Crate:DL or Crate:L or Crate:UL_C or Crate:DL_C or Crate:None or Crate:HH or Crate:U_E or Crate:D_E or Crate:L_E or Stone:L or Stone:HH
+
+object = Human or DeadHuman or wall or Holdable or Stone:SimpleShapes
+stable = Wall or holdable or human or Stone:SimpleShapes (旋转时判定不能被侵占的格子，需要用no RMark过滤)
+ObjectOrJump = Object or HumanJump
+Massive = Human or DeadHuman or Holdable or Stone:SimpleShapes (受重力影响的)
+Blocks = Holdable or Stone:SimpleShapes (受重力影响但是排除Human，在计算力传导时使用)
+
+=======
+SOUNDS
+=======
+
+undo 21150709
+endlevel 33645300
+(human Move 12917107)
+
+sfx0 16961500 (锁定holdable)
+(sfx1 27137709 (取消选中))
+sfx1 76110109 (取消选中)
+
+sfx2 63043704 (死亡)
+sfx3 25391905 (跳跃)
+sfx4 55776908 (开始瞄准)
+sfx5 88635503 (旋转)
+sfx6 92986502 (melt)
+
+================
+COLLISIONLAYERS
+================
+
+Background
+Wall ((0,0)位置用于temp变量，会存各种东西，所以Wall单独一个layer)
+Exit
+Human, DeadHuman, Holdable, Stone:SimpleShapes (object except wall)
+Lava
+
+CMark
+CMark_Spread
+RMark
+U_2 U_1 U0 U1 U2 U_3 U3
+R_2 R_1 R0 R1 R2 R_3 R3
+Aim
+HumanJump
+JumpDoneMarker
+JumpableChecker
+Flag_MoveStopped
+HumanMoveLeft, HumanMoveRight
+is_moving
+is_rotating
+is_falling
+Temp
+prop_conn_u
+prop_conn_d
+prop_conn_l
+prop_conn_r
+prop_conn_none
+
+======
+RULES
+======
+
+(在跳高的中间步骤不要移动，最高优先级取消输入)
+[ moving Human ] [ HumanJump ] -> [ Human ] [ HumanJump ]
+
+(瞄准阶段不要移动, 此时只有光标移动)
+[ moving Human ] [ Aim ] -> [ Human ] [ Aim ]
+
+(控制阶段响应up/down进行旋转)
+[ down Human ] [ CMark no CWize ] [ no Temp ] -> [ Human ] [ CMark CWize ] [ Temp ] again (顺时针旋转，取消human移动，旋转后跟一帧计算重力)
+[ up Human ] [ CMark no AWize ] [ no Temp ] -> [ Human ] [ CMark AWize ] [ Temp ] again	(逆时针旋转，取消human移动，旋转后跟一帧计算重力)
+
+(正常模式下禁止上下移动，跳跃依靠右侧有物体)
+[ vertical Human ] -> [ Human ]
+
+(瞄准阶段、控制阶段的进入、退出)
+[ action Human ] [ CMark ] -> [ Human ] [ ] sfx1		(退出控制)
+[ action Human ] [ no Aim ] [ no CMark ] -> [ Human Aim ] [] []	sfx4 (进入瞄准模式)
+[ action Aim holdable ] -> [ CMark holdable ] sfx0	(选中物体，加标记)
+[ action Aim no holdable ] -> [ no holdable ] sfx1	(未选中，退出瞄准模式)
+
+(暂存横向移动，因为算重力过程重随时会清理这个状态)
+[ left Human ] -> [ Human HumanMoveLeft ]
+[ right Human ] -> [ Human HumanMoveRight ]
+
+late [ HumanMoveLeft ] -> []
+late [ HumanMoveRight ] -> []
+
+(熔岩死亡判定)
+late [ Lava holdable ] -> [ Lava ] sfx6
+late [ Lava Human ] -> [ Lava DeadHuman ] sfx2 (被岩浆烫死)
+late [ Lava CMark ] -> [ Lava ]
+late down [ human | Spike ] -> [ DeadHuman | Spike ] sfx2 (被尖刺扎死，简单点先不主动end game)
+late [ DeadHuman ] [ CMark ] -> [ DeadHuman ] []
+
+(======== 初始化标记，用于指令缩减 ========)
+[ conn_U ] -> [ conn_U prop_conn_u ]
+[ conn_D ] -> [ conn_D prop_conn_d ]
+[ conn_l ] -> [ conn_L prop_conn_l ]
+[ conn_r ] -> [ conn_R prop_conn_r ]
+
+
+
+late [ prop_conn_u ] -> []
+late [ prop_conn_d ] -> []
+late [ prop_conn_l ] -> []
+late [ prop_conn_r ] -> []
+late [ prop_conn_none ] -> []
+
+(======== 重力逻辑开始 ========)
+(
+整体思路: 先处理重力，然后处理玩家的主动移动 + H块带动。
+这两个力在异形刚体存在的情况下，可能会同时出现，比如一个半边浮空的长条块，所以必须分开。优先处理重力。
+1. 所有单点标记下落，包括human
+2. 不断loop让所有相关都加上下落标记
+3. 单点阻挡测试
+4. 向上传递阻挡flag
+5. 批量清理flag的方向a
+6. 如果还有Massive，跳过human本身的移动操作
+
+处理Human移动的逻辑和上述过程大致相同，区别在
+1. 单点标记只从CMark开始
+2. 传导只限于holdable，Human不参与。比如Human头顶着一个方块，水平移动时不会带动
+)
+
+[moving Human] -> [moving Human] again (这句有实际意义吗？)
+
+(1. 所有单点标记下落，包括human)
+(2. 不断loop让所有相关都加上下落标记)
+down [ stationary massive | no object ] -> [ down massive | no object ] again (物体自由下落)
++ down [ stationary massive | down massive ] -> [ down massive | down massive ] (下方有可能镂空，那么自身也下落)
++ [ down Human ] [ holdable CMark ] -> [ down Human ] [ down holdable down CMark ] (H块控制)
+(推模式，传递给自己的其他组件)
++ up [ moving conn_U | stationary conn_D ] -> [ moving conn_U | moving conn_D ]
++ down [ moving conn_D | stationary conn_U ] -> [ moving conn_D | moving conn_U ]
++ left [ moving conn_L | stationary conn_R ] -> [ moving conn_L | moving conn_R ]
++ right [ moving conn_R | stationary conn_L ] -> [ moving conn_R | moving conn_L ]
+
+(3. 单点阻挡测试)
+(4. 向上传递阻挡flag)
+(5. 批量清理flag的方向)
+down [ down human | humanjump ] -> [ human | humanjump ] (如果在跳跃状态，human不主动下落。这一句是修正massive规则的overkill的)
+down [ down massive | stationary object ] -> [ massive | stationary object ] (被固定的物体阻挡)
++ [ stationary Human ] [ holdable CMark ] -> [ stationary Human ] [ stationary holdable stationary CMark ] (主动停止H块)
+(推模式，传递给自己的其他组件)
+(第2步的传导是有下落尽下落，这一步的传导是有静止尽静止)
++ up [ stationary conn_U | moving conn_D ] -> [ stationary conn_U | stationary conn_D ]
++ down [ stationary conn_D | moving conn_U ] -> [ stationary conn_D | stationary conn_U ]
++ left [ stationary conn_L | moving conn_R ] -> [ stationary conn_L | stationary conn_R ]
++ right [ stationary conn_R | moving conn_L ] -> [ stationary conn_R | stationary conn_L ]
+
+(6. 如果还有Massive，跳过human本身的移动操作。先赋值，再清除，因为语法上无法使用 no down massive)
+[ HumanMoveLeft ] [ stationary Human ] -> [] [ left Human ]
+[ HumanMoveRight ] [ stationary Human ] -> [] [ right Human ]
+[ horizontal human ] [ down massive ] -> [ stationary human ] [ down massive ]
+(============ 重力逻辑 end ===============)
+
+(============ 主动移动逻辑 ===============)
+(上一帧已经确定可以跳跃，此时执行跳跃)
+(JumpDownMarker并没有什么实际作用)
+[ human ] [ HumanJumpRight ] [ no JumpDoneMarker ] -> [ right human ] [] [ JumpDoneMarker ]
+[ human ] [ HumanJumpLeft ] [ no JumpDoneMarker ] -> [ left human ] [] [ JumpDoneMarker ]
+
+(需要判定是否跳跃，判定前需要先进行CMark_Spread，无法跳上被CMark影响的块)
+[ holdable CMark ] -> [ holdable CMark CMark_Spread ]
+up [ Blocks CMark_Spread | Blocks no CMark_Spread ] -> [ Blocks CMark_Spread | Blocks CMark_Spread ]
++ down [ conn_D CMark_Spread | conn_U no CMark_Spread ] -> [ conn_D CMark_Spread | conn_U CMark_Spread ]
++ left [ conn_L CMark_Spread | conn_R no CMark_Spread ] -> [ conn_L CMark_Spread | conn_R CMark_Spread ]
++ right [ conn_R CMark_Spread | conn_L no CMark_Spread ] -> [ conn_R CMark_Spread | conn_L CMark_Spread ]
+
+
+(跳跃，两个方向分开处理。使用两帧处理上跳和水平移动，以便H块能跟随移动)
+right [ > human | object no CMark_Spread ] -> [ ^ human HumanJumpRight | object no CMark_Spread ]
+left [ > human | object no CMark_Spread ] -> [ v human HumanJumpLeft | object no CMark_Spread ]
+up [ > human | ] -> [ > human | JumpableChecker ]		(生成一个临时节点，用于检测斜角是否有可以移动的空间)
+[ JumpableChecker object no CMark_Spread ] [ up human humanjump ] -> [ object no CMark_Spread ] [ human ]	(如果有障碍，则消除临时节点，取消跳跃)
+
+right [ stationary JumpableChecker | object no CMark_Spread ] [ HumanJumpRight ] -> [ | object no CMark_Spread ] [ ]	(临时节点水平检测，检测失败就删除自己)
+left [ stationary JumpableChecker | object no CMark_Spread ] [ HumanJumpLeft ] -> [ | object no CMark_Spread ] [ ]
+up [ > human | no JumpableChecker ] -> [ human | no JumpableChecker ]	(如果临时节点被删除，取消human上移)
+
+[JumpableChecker] -> [JumpableChecker] sfx3
+
+[JumpDoneMarker] -> []
+[JumpableChecker] -> []
+
+
+
+
+
+(至此human有可能出现left, right, up 3种情况，除了down之外的移动都标记为is_moving)
+[ horizontal Human ] -> [ horizontal Human is_moving ]
+[ up Human ] -> [ up Human is_moving ]
+[ Human no is_moving ] [ CMark_Spread ] -> [ Human no is_moving ] []	(没有主动移动，清理所有CMark_Spread，后续的传递会失效)
+
+(1. human的移动传递给CMark作为单点输入)
+[ moving Human is_moving ] [ holdable CMark ] -> [ moving Human is_moving ] [ moving holdable moving CMark ]
+
+(2. 不断loop让所有相关都加上移动标记)
++ down [ stationary Blocks CMark_Spread | moving Blocks CMark_Spread ] -> [ moving Blocks CMark_Spread | moving Blocks CMark_Spread ] (下方物体，那么自身也被带动)
++ up [ moving conn_U CMark_Spread | stationary conn_D ] -> [ moving conn_U CMark_Spread | moving conn_D ]
++ down [ moving conn_D CMark_Spread | stationary conn_U ] -> [ moving conn_D CMark_Spread | moving conn_U ]
++ left [ moving conn_L CMark_Spread | stationary conn_R ] -> [ moving conn_L CMark_Spread | moving conn_R ]
++ right [ moving conn_R CMark_Spread | stationary conn_L ] -> [ moving conn_R CMark_Spread | moving conn_L ]
+
+(3. 单点阻挡测试)
+(4. 向上传递阻挡flag)
+(5. 批量清理flag的方向)
+[ > Blocks CMark_Spread | stationary object ] -> [ Blocks CMark_Spread | stationary object ] (被固定的物体阻挡)
++ [ > Human | stationary object CMark_Spread ] -> [ stationary Human | stationary object CMark_Spread ] (human被固定的物体阻挡)
++ up [ stationary Blocks CMark_Spread | moving Blocks CMark_Spread ] -> [ stationary Blocks CMark_Spread | stationary Blocks CMark_Spread ] (向上传递，但是不要影响human)
++ [ stationary Human ] [ moving holdable moving CMark ] -> [ stationary Human ] [ stationary holdable stationary CMark ] (主动停止H块)
+(推模式，传递给自己的其他组件)
+(第2步的传导是有下落尽下落，这一步的传导是有静止尽静止)
++ up [ stationary conn_U CMark_Spread | moving conn_D ] -> [ stationary conn_U CMark_Spread | stationary conn_D ]
++ down [ stationary conn_D CMark_Spread | moving conn_U ] -> [ stationary conn_D CMark_Spread | stationary conn_U ]
++ left [ stationary conn_L CMark_Spread | moving conn_R ] -> [ stationary conn_L CMark_Spread | stationary conn_R ]
++ right [ stationary conn_R CMark_Spread | moving conn_L ] -> [ stationary conn_R CMark_Spread | stationary conn_L ]
+
+[ moving CMark stationary holdable ] -> [ stationary CMark stationary holdable ]
+up [ up Human | stationary object ] [ HumanJump ] -> [ stationary Human | stationary object ] [] (反向传递后，发现human被阻挡，取消跳跃)
+[ stationary Human ] [ humanjump ] -> [ stationary Human ] [] (通过反向传递被阻挡的case)
+[ Human is_moving ] -> [ Human is_moving ] again (跳跃后触发下一帧平行移动)
+
+late [ CMark_Spread ] -> []
+
+
+
+(============ 主动移动逻辑 end ===============)
+
+
+(======== 旋转逻辑开始 ========)
+(旋转豁免逻辑)
+[ CMark is_rotating Spike ] -> [ CMark Spike ]	(尖刺不旋转)
+[ CMark is_rotating Crate:O ] -> [ CMark Crate:O ]	(单个的箱子不旋转)
+
+[ CMark is_rotating ] -> [ CMark is_rotating RMark ]
+(刚体传染RMark)
+up [ conn_u RMark | conn_d no RMark ] -> [ conn_u RMark | conn_d RMark ]
++down [ conn_d RMark | conn_u no RMark ] -> [ conn_d RMark | conn_u RMark ]
++left [ conn_l RMark | conn_r no RMark ] -> [ conn_l RMark | conn_r RMark ]
++right [ conn_r RMark | conn_l no RMark ] -> [ conn_r RMark | conn_l RMark ]
+
+[ CMark is_rotating ] -> [ CMark is_rotating U0 R0 ]
+
+(中线生成，没有is_rotating就不会有U0 R0，所以这里不用判断is_rotationg)
+down [ U0 | ] -> [ U0 | U_1 R0 ]
+down [ U_1 | ] -> [ U_1 | U_2 R0 ]
+up [ U0 | ] -> [ u0 | U1 R0 ]
+up [ U1 | ] -> [ U1 | U2 R0 ]
+
+(左右展开)
+left [ R0 U_ANY | ] -> [ R0 U_ANY | R_1 U_ANY ]
+left [ R_1 U_ANY | ] -> [ R_1 U_ANY | R_2 U_ANY ]
+right [ R0 U_ANY | ] -> [ R0 U_ANY | R1 U_ANY ]
+right [ R1 U_ANY | ] -> [ R1 U_ANY | R2 U_ANY ]
+
+(-3,3正轴)
+down [ R0 U_2 | ] -> [ R0 U_2 | R0 U_3 ]
+up [ R0 U2 | ] -> [ R0 U2 | R0 U3 ]
+left [ R_2 U0 | ] -> [ R_2 U0 | R_3 U0 ]
+right [ R2 U0 | ] -> [ R2 U0 | R3 U0 ]
+
+[ CWize ] [ R_2 U_2 crate_part RMark ] [ R_2 U2 stable no RMark ] -> cancel
+[ CWize ] [ R2 U_2 crate_part RMark ] [ R_2 U_2 stable no RMark ] -> cancel
+[ CWize ] [ R2 U2 crate_part RMark ] [ R2 U_2 stable no RMark ] -> cancel
+[ CWize ] [ R_2 U2 crate_part RMark ] [ R2 U2 stable no RMark ] -> cancel
+[ CWize ] [ R_2 U_1 crate_part RMark ] [ R_1 U2 stable no RMark ] -> cancel
+[ CWize ] [ R1 U_2 crate_part RMark ] [ R_2 U_1 stable no RMark ] -> cancel
+[ CWize ] [ R2 U1 crate_part RMark ] [ R1 U_2 stable no RMark ] -> cancel
+[ CWize ] [ R_1 U2 crate_part RMark ] [ R2 U1 stable no RMark ] -> cancel
+[ CWize ] [ R_2 U0 crate_part RMark ] [ R0 U2 stable no RMark ] -> cancel
+[ CWize ] [ R0 U_2 crate_part RMark ] [ R_2 U0 stable no RMark ] -> cancel
+[ CWize ] [ R2 U0 crate_part RMark ] [ R0 U_2 stable no RMark ] -> cancel
+[ CWize ] [ R0 U2 crate_part RMark ] [ R2 U0 stable no RMark ] -> cancel
+[ CWize ] [ R_2 U1 crate_part RMark ] [ R1 U2 stable no RMark ] -> cancel
+[ CWize ] [ R_1 U_2 crate_part RMark ] [ R_2 U1 stable no RMark ] -> cancel
+[ CWize ] [ R2 U_1 crate_part RMark ] [ R_1 U_2 stable no RMark ] -> cancel
+[ CWize ] [ R1 U2 crate_part RMark ] [ R2 U_1 stable no RMark ] -> cancel
+[ CWize ] [ R_1 U_1 crate_part RMark ] [ R_1 U1 stable no RMark ] -> cancel
+[ CWize ] [ R1 U_1 crate_part RMark ] [ R_1 U_1 stable no RMark ] -> cancel
+[ CWize ] [ R1 U1 crate_part RMark ] [ R1 U_1 stable no RMark ] -> cancel
+[ CWize ] [ R_1 U1 crate_part RMark ] [ R1 U1 stable no RMark ] -> cancel
+[ CWize ] [ R_1 U0 crate_part RMark ] [ R0 U1 stable no RMark ] -> cancel
+[ CWize ] [ R0 U_1 crate_part RMark ] [ R_1 U0 stable no RMark ] -> cancel
+[ CWize ] [ R1 U0 crate_part RMark ] [ R0 U_1 stable no RMark ] -> cancel
+[ CWize ] [ R0 U1 crate_part RMark ] [ R1 U0 stable no RMark ] -> cancel
+[ CWize ] [ R0 U_3 crate_part RMark ] [ R_3 U0 stable no RMark ] -> cancel
+[ CWize ] [ R3 U0 crate_part RMark ] [ R0 U_3 stable no RMark ] -> cancel
+[ CWize ] [ R0 U3 crate_part RMark ] [ R3 U0 stable no RMark ] -> cancel
+[ CWize ] [ R_3 U0 crate_part RMark ] [ R0 U3 stable no RMark ] -> cancel
+
+[ CWize ] [ R_2 U2 crate_part RMark ] [ temp ] -> [ CWize ] [ R_2 U2 ] [ temp crate_part RMark ]
+[ CWize ] [ R_2 U_2 crate_part RMark ] [ R_2 U2 ] -> [ CWize ] [ R_2 U_2 ] [ R_2 U2 crate_part RMark ]
+[ CWize ] [ R2 U_2 crate_part RMark ] [ R_2 U_2 ] -> [ CWize ] [ R2 U_2 ] [ R_2 U_2 crate_part RMark ]
+[ CWize ] [ R2 U2 crate_part RMark ] [ R2 U_2 ] -> [ CWize ] [ R2 U2 ] [ R2 U_2 crate_part RMark ]
+[ CWize ] [ temp crate_part RMark ] [ R2 U2 ] -> [ CWize ] [ temp ] [ R2 U2 crate_part RMark ]
+
+[ CWize ] [ R_1 U2 crate_part RMark ] [ temp ] -> [ CWize ] [ R_1 U2 ] [ temp crate_part RMark ]
+[ CWize ] [ R_2 U_1 crate_part RMark ] [ R_1 U2 ] -> [ CWize ] [ R_2 U_1 ] [ R_1 U2 crate_part RMark ]
+[ CWize ] [ R1 U_2 crate_part RMark ] [ R_2 U_1 ] -> [ CWize ] [ R1 U_2 ] [ R_2 U_1 crate_part RMark ]
+[ CWize ] [ R2 U1 crate_part RMark ] [ R1 U_2 ] -> [ CWize ] [ R2 U1 ] [ R1 U_2 crate_part RMark ]
+[ CWize ] [ temp crate_part RMark ] [ R2 U1 ] -> [ CWize ] [ temp ] [ R2 U1 crate_part RMark ]
+
+[ CWize ] [ R0 U2 crate_part RMark ] [ temp ] -> [ CWize ] [ R0 U2 ] [ temp crate_part RMark ]
+[ CWize ] [ R_2 U0 crate_part RMark ] [ R0 U2 ] -> [ CWize ] [ R_2 U0 ] [ R0 U2 crate_part RMark ]
+[ CWize ] [ R0 U_2 crate_part RMark ] [ R_2 U0 ] -> [ CWize ] [ R0 U_2 ] [ R_2 U0 crate_part RMark ]
+[ CWize ] [ R2 U0 crate_part RMark ] [ R0 U_2 ] -> [ CWize ] [ R2 U0 ] [ R0 U_2 crate_part RMark ]
+[ CWize ] [ temp crate_part RMark ] [ R2 U0 ] -> [ CWize ] [ temp ] [ R2 U0 crate_part RMark ]
+
+[ CWize ] [ R1 U2 crate_part RMark ] [ temp ] -> [ CWize ] [ R1 U2 ] [ temp crate_part RMark ]
+[ CWize ] [ R_2 U1 crate_part RMark ] [ R1 U2 ] -> [ CWize ] [ R_2 U1 ] [ R1 U2 crate_part RMark ]
+[ CWize ] [ R_1 U_2 crate_part RMark ] [ R_2 U1 ] -> [ CWize ] [ R_1 U_2 ] [ R_2 U1 crate_part RMark ]
+[ CWize ] [ R2 U_1 crate_part RMark ] [ R_1 U_2 ] -> [ CWize ] [ R2 U_1 ] [ R_1 U_2 crate_part RMark ]
+[ CWize ] [ temp crate_part RMark ] [ R2 U_1 ] -> [ CWize ] [ temp ] [ R2 U_1 crate_part RMark ]
+
+[ CWize ] [ R_1 U1 crate_part RMark ] [ temp ] -> [ CWize ] [ R_1 U1 ] [ temp crate_part RMark ]
+[ CWize ] [ R_1 U_1 crate_part RMark ] [ R_1 U1 ] -> [ CWize ] [ R_1 U_1 ] [ R_1 U1 crate_part RMark ]
+[ CWize ] [ R1 U_1 crate_part RMark ] [ R_1 U_1 ] -> [ CWize ] [ R1 U_1 ] [ R_1 U_1 crate_part RMark ]
+[ CWize ] [ R1 U1 crate_part RMark ] [ R1 U_1 ] -> [ CWize ] [ R1 U1 ] [ R1 U_1 crate_part RMark ]
+[ CWize ] [ temp crate_part RMark ] [ R1 U1 ] -> [ CWize ] [ temp ] [ R1 U1 crate_part RMark ]
+
+[ CWize ] [ R0 U1 crate_part RMark ] [ temp ] -> [ CWize ] [ R0 U1 ] [ temp crate_part RMark ]
+[ CWize ] [ R_1 U0 crate_part RMark ] [ R0 U1 ] -> [ CWize ] [ R_1 U0 ] [ R0 U1 crate_part RMark ]
+[ CWize ] [ R0 U_1 crate_part RMark ] [ R_1 U0 ] -> [ CWize ] [ R0 U_1 ] [ R_1 U0 crate_part RMark ]
+[ CWize ] [ R1 U0 crate_part RMark ] [ R0 U_1 ] -> [ CWize ] [ R1 U0 ] [ R0 U_1 crate_part RMark ]
+[ CWize ] [ temp crate_part RMark ] [ R1 U0 ] -> [ CWize ] [ temp ] [ R1 U0 crate_part RMark ]
+
+[ CWize ] [ R_3 U0 crate_part RMark ] [ temp ] -> [ CWize ] [ R_3 U0 ] [ temp crate_part RMark ]
+[ CWize ] [ R0 U_3 crate_part RMark ] [ R_3 U0 ] -> [ CWize ] [ R0 U_3 ] [ R_3 U0 crate_part RMark ]
+[ CWize ] [ R3 U0 crate_part RMark ] [ R0 U_3 ] -> [ CWize ] [ R3 U0 ] [ R0 U_3 crate_part RMark ]
+[ CWize ] [ R0 U3 crate_part RMark ] [ R3 U0 ] -> [ CWize ] [ R0 U3 ] [ R3 U0 crate_part RMark ]
+[ CWize ] [ temp crate_part RMark ] [ R0 U3 ] -> [ CWize ] [ temp ] [ R0 U3 crate_part RMark ]
+
+
+[ AWize ] [ R2 U2 crate_part RMark ] [ R_2 U2 stable no RMark ] -> cancel
+[ AWize ] [ R2 U_2 crate_part RMark ] [ R2 U2 stable no RMark ] -> cancel
+[ AWize ] [ R_2 U_2 crate_part RMark ] [ R2 U_2 stable no RMark ] -> cancel
+[ AWize ] [ R_2 U2 crate_part RMark ] [ R_2 U_2 stable no RMark ] -> cancel
+[ AWize ] [ R2 U1 crate_part RMark ] [ R_1 U2 stable no RMark ] -> cancel
+[ AWize ] [ R1 U_2 crate_part RMark ] [ R2 U1 stable no RMark ] -> cancel
+[ AWize ] [ R_2 U_1 crate_part RMark ] [ R1 U_2 stable no RMark ] -> cancel
+[ AWize ] [ R_1 U2 crate_part RMark ] [ R_2 U_1 stable no RMark ] -> cancel
+[ AWize ] [ R2 U0 crate_part RMark ] [ R0 U2 stable no RMark ] -> cancel
+[ AWize ] [ R0 U_2 crate_part RMark ] [ R2 U0 stable no RMark ] -> cancel
+[ AWize ] [ R_2 U0 crate_part RMark ] [ R0 U_2 stable no RMark ] -> cancel
+[ AWize ] [ R0 U2 crate_part RMark ] [ R_2 U0 stable no RMark ] -> cancel
+[ AWize ] [ R2 U_1 crate_part RMark ] [ R1 U2 stable no RMark ] -> cancel
+[ AWize ] [ R_1 U_2 crate_part RMark ] [ R2 U_1 stable no RMark ] -> cancel
+[ AWize ] [ R_2 U1 crate_part RMark ] [ R_1 U_2 stable no RMark ] -> cancel
+[ AWize ] [ R1 U2 crate_part RMark ] [ R_2 U1 stable no RMark ] -> cancel
+[ AWize ] [ R1 U1 crate_part RMark ] [ R_1 U1 stable no RMark ] -> cancel
+[ AWize ] [ R1 U_1 crate_part RMark ] [ R1 U1 stable no RMark ] -> cancel
+[ AWize ] [ R_1 U_1 crate_part RMark ] [ R1 U_1 stable no RMark ] -> cancel
+[ AWize ] [ R_1 U1 crate_part RMark ] [ R_1 U_1 stable no RMark ] -> cancel
+[ AWize ] [ R1 U0 crate_part RMark ] [ R0 U1 stable no RMark ] -> cancel
+[ AWize ] [ R0 U_1 crate_part RMark ] [ R1 U0 stable no RMark ] -> cancel
+[ AWize ] [ R_1 U0 crate_part RMark ] [ R0 U_1 stable no RMark ] -> cancel
+[ AWize ] [ R0 U1 crate_part RMark ] [ R_1 U0 stable no RMark ] -> cancel
+[ AWize ] [ R0 U3 crate_part RMark ] [ R_3 U0 stable no RMark ] -> cancel
+[ AWize ] [ R3 U0 crate_part RMark ] [ R0 U3 stable no RMark ] -> cancel
+[ AWize ] [ R0 U_3 crate_part RMark ] [ R3 U0 stable no RMark ] -> cancel
+[ AWize ] [ R_3 U0 crate_part RMark ] [ R0 U_3 stable no RMark ] -> cancel
+
+[ AWize ] [ R_2 U2 crate_part RMark ] [ temp ] -> [ AWize ] [ R_2 U2 ] [ temp crate_part RMark ]
+[ AWize ] [ R2 U2 crate_part RMark ] [ R_2 U2 ] -> [ AWize ] [ R2 U2 ] [ R_2 U2 crate_part RMark ]
+[ AWize ] [ R2 U_2 crate_part RMark ] [ R2 U2 ] -> [ AWize ] [ R2 U_2 ] [ R2 U2 crate_part RMark ]
+[ AWize ] [ R_2 U_2 crate_part RMark ] [ R2 U_2 ] -> [ AWize ] [ R_2 U_2 ] [ R2 U_2 crate_part RMark ]
+[ AWize ] [ temp crate_part RMark ] [ R_2 U_2 ] -> [ AWize ] [ temp ] [ R_2 U_2 crate_part RMark ]
+
+[ AWize ] [ R_1 U2 crate_part RMark ] [ temp ] -> [ AWize ] [ R_1 U2 ] [ temp crate_part RMark ]
+[ AWize ] [ R2 U1 crate_part RMark ] [ R_1 U2 ] -> [ AWize ] [ R2 U1 ] [ R_1 U2 crate_part RMark ]
+[ AWize ] [ R1 U_2 crate_part RMark ] [ R2 U1 ] -> [ AWize ] [ R1 U_2 ] [ R2 U1 crate_part RMark ]
+[ AWize ] [ R_2 U_1 crate_part RMark ] [ R1 U_2 ] -> [ AWize ] [ R_2 U_1 ] [ R1 U_2 crate_part RMark ]
+[ AWize ] [ temp crate_part RMark ] [ R_2 U_1 ] -> [ AWize ] [ temp ] [ R_2 U_1 crate_part RMark ]
+
+[ AWize ] [ R0 U2 crate_part RMark ] [ temp ] -> [ AWize ] [ R0 U2 ] [ temp crate_part RMark ]
+[ AWize ] [ R2 U0 crate_part RMark ] [ R0 U2 ] -> [ AWize ] [ R2 U0 ] [ R0 U2 crate_part RMark ]
+[ AWize ] [ R0 U_2 crate_part RMark ] [ R2 U0 ] -> [ AWize ] [ R0 U_2 ] [ R2 U0 crate_part RMark ]
+[ AWize ] [ R_2 U0 crate_part RMark ] [ R0 U_2 ] -> [ AWize ] [ R_2 U0 ] [ R0 U_2 crate_part RMark ]
+[ AWize ] [ temp crate_part RMark ] [ R_2 U0 ] -> [ AWize ] [ temp ] [ R_2 U0 crate_part RMark ]
+
+[ AWize ] [ R1 U2 crate_part RMark ] [ temp ] -> [ AWize ] [ R1 U2 ] [ temp crate_part RMark ]
+[ AWize ] [ R2 U_1 crate_part RMark ] [ R1 U2 ] -> [ AWize ] [ R2 U_1 ] [ R1 U2 crate_part RMark ]
+[ AWize ] [ R_1 U_2 crate_part RMark ] [ R2 U_1 ] -> [ AWize ] [ R_1 U_2 ] [ R2 U_1 crate_part RMark ]
+[ AWize ] [ R_2 U1 crate_part RMark ] [ R_1 U_2 ] -> [ AWize ] [ R_2 U1 ] [ R_1 U_2 crate_part RMark ]
+[ AWize ] [ temp crate_part RMark ] [ R_2 U1 ] -> [ AWize ] [ temp ] [ R_2 U1 crate_part RMark ]
+
+[ AWize ] [ R_1 U1 crate_part RMark ] [ temp ] -> [ AWize ] [ R_1 U1 ] [ temp crate_part RMark ]
+[ AWize ] [ R1 U1 crate_part RMark ] [ R_1 U1 ] -> [ AWize ] [ R1 U1 ] [ R_1 U1 crate_part RMark ]
+[ AWize ] [ R1 U_1 crate_part RMark ] [ R1 U1 ] -> [ AWize ] [ R1 U_1 ] [ R1 U1 crate_part RMark ]
+[ AWize ] [ R_1 U_1 crate_part RMark ] [ R1 U_1 ] -> [ AWize ] [ R_1 U_1 ] [ R1 U_1 crate_part RMark ]
+[ AWize ] [ temp crate_part RMark ] [ R_1 U_1 ] -> [ AWize ] [ temp ] [ R_1 U_1 crate_part RMark ]
+
+[ AWize ] [ R0 U1 crate_part RMark ] [ temp ] -> [ AWize ] [ R0 U1 ] [ temp crate_part RMark ]
+[ AWize ] [ R1 U0 crate_part RMark ] [ R0 U1 ] -> [ AWize ] [ R1 U0 ] [ R0 U1 crate_part RMark ]
+[ AWize ] [ R0 U_1 crate_part RMark ] [ R1 U0 ] -> [ AWize ] [ R0 U_1 ] [ R1 U0 crate_part RMark ]
+[ AWize ] [ R_1 U0 crate_part RMark ] [ R0 U_1 ] -> [ AWize ] [ R_1 U0 ] [ R0 U_1 crate_part RMark ]
+[ AWize ] [ temp crate_part RMark ] [ R_1 U0 ] -> [ AWize ] [ temp ] [ R_1 U0 crate_part RMark ]
+
+[ AWize ] [ R_3 U0 crate_part RMark ] [ temp ] -> [ AWize ] [ R_3 U0 ] [ temp crate_part RMark ]
+[ AWize ] [ R0 U3 crate_part RMark ] [ R_3 U0 ] -> [ AWize ] [ R0 U3 ] [ R_3 U0 crate_part RMark ]
+[ AWize ] [ R3 U0 crate_part RMark ] [ R0 U3 ] -> [ AWize ] [ R3 U0 ] [ R0 U3 crate_part RMark ]
+[ AWize ] [ R0 U_3 crate_part RMark ] [ R3 U0 ] -> [ AWize ] [ R0 U_3 ] [ R3 U0 crate_part RMark ]
+[ AWize ] [ temp crate_part RMark ] [ R0 U_3 ] -> [ AWize ] [ temp ] [ R0 U_3 crate_part RMark ]
+
+
+
+
+[ is_rotating ] [ Crate:VV RMark ] -> [ is_rotating ] [ Crate:HH ]
+[ is_rotating ] [ Crate:HH RMark ] -> [ is_rotating ] [ Crate:VV ]
+(part自旋转，CWize，旋转时顺便清理CMark避免重入)
+[ CWize ] [ Crate:U RMark ] -> [ CWize ] [ Crate:R ]
+[ CWize ] [ Crate:R RMark ] -> [ CWize ] [ Crate:D ]
+[ CWize ] [ Crate:D RMark ] -> [ CWize ] [ Crate:L ]
+[ CWize ] [ Crate:L RMark ] -> [ CWize ] [ Crate:U ]
+[ CWize ] [ Crate:UR RMark ] -> [ CWize ] [ Crate:DR ]
+[ CWize ] [ Crate:DR RMark ] -> [ CWize ] [ Crate:DL ]
+[ CWize ] [ Crate:DL RMark ] -> [ CWize ] [ Crate:UL ]
+[ CWize ] [ Crate:UL RMark ] -> [ CWize ] [ Crate:UR ]
+[ CWize ] [ Crate:UR_C RMark ] -> [ CWize ] [ Crate:DR_C ]
+[ CWize ] [ Crate:DR_C RMark ] -> [ CWize ] [ Crate:DL_C ]
+[ CWize ] [ Crate:DL_C RMark ] -> [ CWize ] [ Crate:UL_C ]
+[ CWize ] [ Crate:UL_C RMark ] -> [ CWize ] [ Crate:UR_C ]
+[ CWize ] [ Crate:U_E RMark ] -> [ CWize ] [ Crate:R_E ]
+[ CWize ] [ Crate:D_E RMark ] -> [ CWize ] [ Crate:L_E ]
+[ CWize ] [ Crate:L_E RMark ] -> [ CWize ] [ Crate:U_E ]
+[ CWize ] [ Crate:R_E RMark ] -> [ CWize ] [ Crate:D_E ]
+
+
+(part自旋转，CWize，旋转时顺便清理CMark避免重入)
+[ Awize ] [ Crate:U RMark ] -> [ Awize ] [ Crate:L ]
+[ Awize ] [ Crate:L RMark ] -> [ Awize ] [ Crate:D ]
+[ Awize ] [ Crate:D RMark ] -> [ Awize ] [ Crate:R ]
+[ Awize ] [ Crate:R RMark ] -> [ Awize ] [ Crate:U ]
+[ Awize ] [ Crate:UR RMark ] -> [ Awize ] [ Crate:UL ]
+[ Awize ] [ Crate:UL RMark ] -> [ Awize ] [ Crate:DL ]
+[ Awize ] [ Crate:DL RMark ] -> [ Awize ] [ Crate:DR ]
+[ Awize ] [ Crate:DR RMark ] -> [ Awize ] [ Crate:UR ]
+[ Awize ] [ Crate:UR_C RMark ] -> [ Awize ] [ Crate:UL_C ]
+[ Awize ] [ Crate:UL_C RMark ] -> [ Awize ] [ Crate:DL_C ]
+[ Awize ] [ Crate:DL_C RMark ] -> [ Awize ] [ Crate:DR_C ]
+[ Awize ] [ Crate:DR_C RMark ] -> [ Awize ] [ Crate:UR_C ]
+[ AWize ] [ Crate:R_E RMark ] -> [ AWize ] [ Crate:U_E ]
+[ AWize ] [ Crate:L_E RMark ] -> [ AWize ] [ Crate:D_E ]
+[ AWize ] [ Crate:U_E RMark ] -> [ AWize ] [ Crate:L_E ]
+[ AWize ] [ Crate:D_E RMark ] -> [ AWize ] [ Crate:R_E ]
+
+(清理临时标记)
+[ is_rotating ] -> [] sfx5
+[ RMark ] -> []
+[ position ] -> []
+[ Temp ] -> []
+(======== end ========)
+
+
+==============
+WINCONDITIONS
+==============
+
+some Human on Exit
+
+=======
+LEVELS
+=======
+
+(
+╔═╗
+║x║
+╚═╝
+ n
+c_ↄ
+╔═ↄ
+u
+┏┓ (和╔只在表现形式下不同，需要抹除角落杂点时使用)
+┗┛
+n
+u
+cↄ
+ _
+⎸ ⎹
+
+)
+
+(for debug)
+(
+############
+#........###
+#........###
+####.......#
+####..p....#
+####..o....#
+####..o...e#
+############
+
+##########
+#n......o#
+#u...┏┓..#
+#.n.p┗┛..#
+#.uo.....#
+#..cↄ.#..#
+#........#
+#........#
+#...cↄ...#
+#....#...#
+#........#
+##########
+
+##########
+#....╔═╗.#
+#....║x║.#
+#...p╚═╝.#
+#n.......#
+#║.......#
+#║.╔═ↄ...#
+#u.u.....#
+#.n......#
+#c_ↄ.#...#
+#........#
+##########
+)
+
+
+(
+message test level 1
+#########
+#......e#
+#......##
+###....##
+#..*.####
+#.cↄp...#
+#.o.oo.e#
+#########
+
+message test level 2
+#########
+#......e#
+#......##
+###....##
+#...*####
+#...cↄ..#
+#.o.oope#
+#########
+
+message test level 3
+#########
+#......e#
+#......##
+###....##
+#...*####
+#.#cↄp..#
+#.o.oo.e#
+#########
+
+message test level 4
+#########
+#......e#
+#......##
+###..p.##
+#...o####
+#...o...#
+#...*..e#
+#########
+
+message test level 5
+#########
+#......e#
+#......##
+###*...##
+#..p.####
+#.cↄ....#
+#.o.oo.e#
+#########
+)
+
+(
+section 0-1 Test Stone
+############
+#.........e#
+#..........#
+#....#.....#
+#..........#
+#......#...#
+#..........#
+#...n#q....#
+#.pc╝.*....#
+############
+
+#########
+#.......#
+#.......#
+#.......#
+#.......#
+#..{}...#
+#.p.cↄ..#
+#########
+
+#########
+#.......#
+#.......#
+#.......#
+#..q....#
+#..q....#
+#.pcↄ...#
+#########
+
+###########
+#.........#
+#.....{}.e#
+#.{}..#.###
+##.#......#
+#.........#
+#.p#cↄ....#
+###########
+
+
+section 0-2 
+###########
+#........e#
+#........##
+#.........#
+#....{}...#
+#....#....#
+#.........#
+#..n..n.M.#
+#p.╚ↄ.u.W.#
+###########
+)
+
+(
+═ = Crate:H
+x = Crate:None
+║ = Crate:V
+)
+
+(section 0-1 Lava
+###########
+######..n.#
+#....┏┓.║.#
+#..p.┗┛.ue#
+####~~#####
+###########)
+
+
+section 1-1 Mind Force
+message GieGie use mind force to control crates.
+message X to aim, choose a crate and press X to start controlling, X again to release.
+##########
+##########
+#........#
+#p...o..e#
+####.#####
+##########
+##########
+
+
+section 1-2 Drive
+message 1-2 Drive
+##########
+#........#
+#........#
+#p......e#
+###o...###
+###****###
+##########
+
+
+section 1-3 Step Up
+message 1-3 Step Up
+##########
+#........#
+#.......e#
+#.......##
+#.......##
+#op##.####
+##########
+
+
+section 1-4 Pull Up
+message 1-4 Pull Up
+##########
+#........#
+#.p.o...e#
+###.##..##
+###.##..##
+#####..###
+####..####
+##...#####
+##o..#####
+##########
+
+
+section 1-5 Control Spikes
+message 1-5 Control Spikes
+##########
+#........#
+#........#
+#........#
+#p.#*.*.e#
+##########
+
+
+section 1-6 Crate And Spike
+message 1-6 Crate And Spike
+##########
+#.......e#
+#......###
+#........#
+##p.o.*..#
+##########
+
+
+section 1-7 Switch Side
+message 1-7 Switch Side
+##########
+#........#
+#........#
+#p.o#...e#
+######.###
+######.###
+##########
+
+
+section 1-8 Stacking-1
+message 1-8 Stacking-1
+#########
+#......e#
+#......##
+###...*##
+#....####
+#...o...#
+#p..o...#
+#########
+
+
+section 1-9 Many Spikes (Hard)
+message 1-9 Many Spikes (Hard)
+#########
+#####o###
+#####*###
+#####*###
+#####*###
+#####*###
+###..*..#
+##...*..#
+##.p.*.e#
+#########
+
+message Congratulations! You compelete Chapter 1.
+
+(
+╔╗
+╚╝
+┏┓
+┗┛
+n
+u
+cↄ
+)
+
+section 2-1 Rotate I Shape
+message When controlling a crate,\nuse down/up to rotate clockwise/anticlockwise
+
+##########
+#...n....#
+#p..u..#.#
+########.#
+####..##.#
+#e..cↄ...#
+##########
+
+section 2-2 Everything About I
+message 2-2 Everything About I
+(everything about 1x2)
+###########
+#....#....#
+#cↄ..#e...#
+####.##...#
+###.......#
+###p...#..#
+####.######
+####.######
+###########
+
+section 2-3 I + I = ?
+message 2-3 I + I = ?
+###########
+##........#
+##.......e#
+#........##
+#.........#
+##........#
+##...cↄ...#
+##.p.cↄ...#
+###########
+
+section 2-4 L Shape
+message 2-4 L Shape
+##########
+#.p.n....#
+####╚ↄ##.#
+#####.##.#
+########.#
+####n..#.#
+#e.c╝....#
+#####.####
+##########
+
+section 2-5 Climbing L
+message 2-5 Climbing L
+###########
+#.........#
+#.........#
+#.╔ↄ#.....#
+#.u##.....#
+#e#####...#
+##........#
+#.......###
+#.........#
+#.p.......#
+###########
+
+section 2-6 Stacking-2 (Hard)
+message 2-6 Stacking-2 (Hard)
+###########
+#.........#
+#........e#
+#........##
+#.........#
+#.........#
+#....╔ↄn..#
+#..p.uc╝..#
+###########
+
+section 2-8 test
+message 2-8 test
+(
+┏┓
+┗┛
+)
+##########
+###..#####
+###...####
+#p.┏┓...e#
+###┗┛#####
+##########
+##########
+
+
+section 2-9 test2
+message 2-9 test2
+###########
+#........e#
+#........##
+#.........#
+#.........#
+#.........#
+#....┏┓┏┓.#
+#.p.o┗┛┗┛.#
+###########
+
+section 2-7 Stacking-3 (Hard+)
+message 2-7 Stacking-3 (Hard+)
+###########
+#........e#
+#........##
+#.........#
+#.........#
+#.........#
+#.........#
+#..n..n.n.#
+#p.╚ↄ.u.u.#
+###########
+
+message Congratulations! You compelete Chapter 2.
+
+
+section 3-1 Anti-Control
+message 3-1 Anti-Control.\nGieGie cannot control blue crates.
+##########
+#........#
+#Q......e#
+#cↄ...####
+###......#
+#.p......#
+##########
+
+section 3-2 Move Away
+message 3-2 Move Away
+##########
+#........#
+#....{}.e#
+#.....####
+#........#
+#.p.cↄ...#
+##########
+
+section 3-3 Shift
+message 3-3 Shift
+##########
+#........#
+#.{}....e#
+###.....##
+#.......##
+#.p.cↄ..##
+##########
+
+section 3-4 Fall Down
+message 3-4 Fall Down
+###########
+#.........#
+#.........#
+#....#...e#
+#..q.....##
+#..q.....##
+#..o...####
+#p##...####
+###########
+
+section 3-5 Fall Down 2
+message 3-5 Fall Down 2
+#########
+#...q...#
+#...m...#
+#..#w#..#
+#...cↄe.#
+#....##.#
+#.......#
+#.......#
+#.p.....#
+#########
+
+section 3-6 Jack Up
+message 3-6 Jack Up
+########
+#......#
+#......#
+#e{}...#
+##.#...#
+#......#
+#.p#cↄ.#
+########
+
+section 3-7 Stacking-4 (Hard+)
+message 3-7 Stacking-4 (Hard+)
+###########
+#........e#
+#........##
+#........##
+#.......{}#
+#........##
+#........##
+#..n..n...#
+#p.╚ↄ.u..##
+###########
+
+section 4-1 Lava
+message 4-1 Lava Melt Everything
+##########
+#...n....#
+#p..u..#.#
+########.#
+####..##.#
+#e..cↄ...#
+##########
+
+message Thank you for playing! More levels will be made...

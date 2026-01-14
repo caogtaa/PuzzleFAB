@@ -1,6 +1,6 @@
 /// Puzzlang is a pattern matching language for abstract games and puzzles. See http://www.polyomino.com/puzzlang.
 ///
-/// Copyright � Polyomino Games 2018. All rights reserved.
+/// Copyright © Polyomino Games 2018. All rights reserved.
 /// 
 /// This is free software. You are free to use it, modify it and/or 
 /// distribute it as set out in the licence at http://www.polyomino.com/licence.
@@ -21,47 +21,61 @@
 @using DOLE
 
 //------------------------------------------------------------------------------
+// StartRule是整个规则的入口，整个规则由一个前导节和若干个内容节组成，解析到文件结尾。如正常匹配则返回"ok"字符串。
+// EOLC表示End Of Line，并且可能包含注释块
+// 解析到文件结尾EOF，如果成功匹配则返回"ok"字符串。
 StartRule 
     = PreludeSection Section+ EOLC* EOF { "ok" }
 
+// 按顺序匹配OBJECT、LEGEND、...等节。如果没有匹配任意一个，并且没有到达文件结尾（意味着遇到了一些无法识别的内容），则报语法错误。
 Section 
     = EOLC* (ObjectSection / LegendSection / SoundSection / CollisionLayerSection / RuleSection 
     / WinConditionSection / ScriptSection / LevelSection 
     / !EOF #error{ "syntax error" })
 
 //------------------------------------------------------------------------------
+// 每个节用 !section_start 负向前瞻来判断是否到达下一个节的开始位置。
 PreludeSection = ( !section_start ( EOLC / setting_line ) )*
 setting_line
-    = v:setting_name w:any_text EOLC { DefSetting(state,v,w) }
-    / v:setting_name EOLC { DefSetting(state,v,"true") }
-    / "no"i v:setting_name EOLC { DefSetting(state,v,"false") }
-    / WSC v:ident #error{ $"option setting expected: '{v}'" } 
+    = v:setting_name w:any_text EOLC { DefSetting(state,v,w) }      // 出现多个单词时，以首个单词为key，后续单词作为value
+    / v:setting_name EOLC { DefSetting(state,v,"true") }            // 只出现1个单词时，视为开启对应设置
+    / "no"i v:setting_name EOLC { DefSetting(state,v,"false") }     // 出现no 前缀时，视为关闭对应设置
+    / WSC v:ident #error{ $"option setting expected: '{v}'" }       // 不在预设setting_name里的单词，报错
 
 //------------------------------------------------------------------------------
+// OBJECT节以字面量OBJECTS开头，以下个section_start结束
 ObjectSection 
     = OBJECTS ( EOLC* !section_start object_line )*
+// object_line 定义一个对象：可选名称/图形符号，对齐属性，缩放比例，颜色定义，可选文本行，以及可选的Sprite位图行
 object_line 
     = WSC v:CanDefine w:glyph? x:justify_ident* y:float_number? EOLX
-      z:ColourExp+ EOLX EOLC*       // blank line(s) permitted before sprite lines
+      z:ColourExp+ EOLX EOLC*       // 定义调色板，blank line(s) permitted before sprite lines
       a:text_line? b:sprite_line* { DefObject(state,v,Single(w),x,Single(y),z,Single(a),b) }
+// text_line 定义对象的文本内容，以 TEXT 或 MESSAGE 开头
 text_line
     = ( TEXT / MESSAGE ) v:any_text EOLW { v }
 
+// sprite_line 定义 Sprite 的一行像素，由至少2个字符组成
 sprite_line 
     = v:SpriteChar<2,> EOLC { String.Concat(v.ToArray()) }       // backtrack here to next object
+// ColourExp 定义颜色值，必须是合法的颜色定义
 ColourExp 
     = WSC v:colour_value &{ IsColour(v) } { v }
     / WSC v:colour_value #error{ $"colour expected: '{v}'" }
 
 //------------------------------------------------------------------------------
+// LEGEND节，定义图例别名
 LegendSection 
     = LEGEND ( EOLC* !section_start LegendLine )*
+// LegendLine 定义一个别名，可以是几个对象的组合（OR 或 AND）
 LegendLine 
     = WSC v:id_or_glyph WSC EQ w:DefinedExp<1,,WSO OR> EOLC { DefLegend(v,w,"or") }
     / WSC v:id_or_glyph WSC EQ w:DefinedExp<1,,WSO AND> EOLX { DefLegend(v,w,"and") }
 
 //------------------------------------------------------------------------------
+// SOUNDS节，定义音效
 SoundSection = SOUNDS ( EOLC* !section_start SoundLine )*
+// SoundLine 定义一个音效规则：可选关联对象，触发事件，可选方向，以及Sfx种子ID
 SoundLine
     = WSC v:Defined? 
         w:(sound_trigger_ident / e:token #error{ $"sound word expected: '{e}'" }) 
@@ -70,28 +84,36 @@ SoundLine
         EOLX { DefSound(Single(v),w,x,y) }
 
 //------------------------------------------------------------------------------
+// COLLISIONLAYERS节，定义碰撞层
 CollisionLayerSection = COLLISIONLAYERS ( EOLC* !section_start CollisionLine )*
+// CollisionLine 定义一层或多层，层内的对象之间会发生碰撞。多个Token表示都在同一层
 CollisionLine 
     = v:( (w:DefinedExp CMA?) { w } )+ EOLX { DefCollision(state,v) }
 
 //------------------------------------------------------------------------------
+// RULES节，核心逻辑规则定义
 RuleSection = RULES ( EOLC* !section_start rule_line )*
+// rule_line 可以是循环控制语句(startloop/endloop)，或者是规则定义(左侧模式 -> 右侧结果 命令)
 rule_line 
     = WSC v:RULELOOP EOLX { Loop(state,v) }
     / WSC v:rule_subrule* RAexp w:rule_subrule* x:rule_command* EOLX { DefRule(state,v,w,x) }
+// rule_subrule 规则的一个子块，通常用中括号包围 [ A | B ]
 rule_subrule<SubRule>
     = WSC v:rule_prefix_ident* LB w:rule_atom_list<0,,WSC VB> RBexp { DefSubRule(v,w) }
     / WSC v:rule_prefix_ident #error{ "left bracket expected" }
+// rule_atom_list 规则子块内部的元素列表，用竖线 | 分隔
 rule_atom_list<IList<RuleAtom>>
     = ELLIP             { DefRuleAtomList("...") }  //  must be first
     / WSC v:rule_atom+  { v }
     / WSC &( VB / RB )  { DefRuleAtomList(null) }
     / #error{ $"object or command expected" }   // no backtrack, already accepted LB
+// rule_atom 规则的基本单元：可选NO前缀(取反)，可选移动方向，对象或脚本调用
 rule_atom<RuleAtom>
     = v:NO? w:move_direction_ident? x:rule_object     { DefRuleAtom(Single(v),Single(w),x.Item1,x.Item2,null) }
     / v:NO? w:move_direction_ident? y:script_call     { DefRuleAtom(Single(v),Single(w),null,null,y) }
     / ( NO / move_direction_ident ) #error{ $"object expected" }
 
+// rule_command 规则匹配后执行的命令，如再次移动(again)、音效(sfx)、检查点(checkpoint)等
 rule_command<CommandCall>
     = v:command_arg_ident w:script_call  { DefCommandCall(state,v,w,null) }  // first
     / v:command_arg_ident x:any_text     { DefCommandCall(state,v,null,x) }
@@ -99,49 +121,62 @@ rule_command<CommandCall>
     / w:script_call                      { DefCommandScript(w) }
     / ident #error{ $"rule command expected" }        // no backtrack, accepted RA
 
+// rule_object 规则中引用的对象，支持变量绑定语法 (var:Object)
 rule_object<Pair<string,string>>
     = !LB !VB !RB !RA &(id_or_glyph COLON) v:Variable COLON w:Defined { Pair.Create(v,w) }
     / !LB !VB !RB !RA v:Defined                                     { Pair.Create((string)null,v) }
 
 //------------------------------------------------------------------------------
+// WINCONDITIONS节，定义胜利条件
 WinConditionSection = WINCONDITIONS ( EOLC* !section_start win_condition_line )*
+// win_condition_line 定义具体的胜利条件：条目对象 ON 目标对象，或者简单的条件
 win_condition_line
     = WSC v:win_condition w:DefinedExp ON x:DefinedExp y:script_call? EOLX { DefWinCondition(v,w,x,Single(y)) }
     / WSC v:win_condition w:DefinedExp y:script_call?   EOLX { DefWinCondition(v,w,null,Single(y)) }
     / WSC y:script_call?                                EOLX { DefWinCondition(null,null,null,Single(y)) }
+// win_condition 胜利条件关键词，如 ALL, SOME, NO
 win_condition
     = v:ident &{ IsWinAction(v) } { v }
     / v:ident #error{ $"win action expected: {v}" }
 
 //------------------------------------------------------------------------------
+// LEVELS节，定义游戏关卡
 LevelSection = LEVELS ( EOLC* !section_start levels_body )*
+// levels_body 关卡内容，包含 Message、新图例定义 或者 关卡地图行
 levels_body 
     = MESSAGE v:any_text? EOLW { DefMessage(Single(v)) }
     / LegendLine
     / v:level_line+ { DefLevel(state,v) }
+// level_line 关卡地图的一行，由地图字符组成
 level_line = v:(!LP LEVELCHAR)+ EOLW { String.Concat(v.ToArray()) }  // .NET 3.5
 
 //------------------------------------------------------------------------------
 // script with non-empty body can only terminate with "=="
+// SCRIPTS节，定义脚本
 ScriptSection = SCRIPTS EOLW* script_body
+// script_body 脚本块，直到下一个 Section 开始
 script_body 
     = &section_start                        // empty body
     / v:script_line+ { DefScript(state,v) }
+// script_line 脚本行，非 "==" 行
 script_line 
     = !( WS* "==" ) v:("" ( !CC . )* ) CR? LF { v }
 
 //------------------------------------------------------------------------------
 // complex tokens
 
+// script_call 脚本函数调用语法 &{ func(args) }
 script_call<ScriptFunctionCall>
     = AMPLC v:script_call_body RCexp { v }
 script_call_body<ScriptFunctionCall>
     = v:ident LP w:ident<0,,WSO CMA> RP { DefScriptCall(v,w) }
     / v:ident                           { DefScriptCall(v,null) }
 
+// CanDefine 检查标识符是否可以被定义（未被使用）
 CanDefine
     = v:id_or_glyph !{ IsDefined(v) } { v }
     / v:id_or_glyph #error{ $"'{v}' already defined" }
+// DefinedExp 检查标识符是否已定义
 DefinedExp 
     = Defined
     / v:id_or_glyph #error{ $"'{v}' not defined" }
@@ -231,7 +266,7 @@ Digit = [0-9];
 HexDigit = [a-fA-F0-9];
 SpriteChar = [.0-9] 
 IdCharX = [._$];
-LEVELCHAR = [\x21-\xfe\u0100-\uffff]
+LEVELCHAR = [\x21-\xfe\u0100-\uffff]    // 允许出现在关卡地图的所有字符集合。包括Unicode，但是不包括空格
 CC = [\x00-\x1f]
 WS = [ \t] 
 CR = "\r"
