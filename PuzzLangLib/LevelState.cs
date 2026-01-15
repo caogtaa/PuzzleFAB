@@ -99,12 +99,12 @@ namespace PuzzLangLib {
           if (_changes[locator] == value)
             _changes.Remove(locator);
         } else
-          _changes[locator] = _level[cellindex, layer];
+          _changes[locator] = _level[locator];
 
         // update map
-        if (value == 0) _objectmap[cellindex].Remove(_level[cellindex, layer]);
+        if (value == 0) _objectmap[cellindex].Remove(_level[locator]);
         else _objectmap[cellindex].Add(value);
-        _level[cellindex, layer] = value;
+        _level[locator] = value;
       }
     }
 

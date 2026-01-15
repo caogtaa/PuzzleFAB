@@ -30,20 +30,50 @@ namespace PuzzLangTest {
     }
   }
 
+  public class Preset {
+    public string BodyTemplate;
+    public string PreludeTemplate;
+    public string CaseName;
+    public string SectionArgs;
+    public string Inputs;
+  }
+
   public static class StaticTestData {
     const string Crlf = "\r\n";
     static readonly char[] Colon = new char[] { ':' };
 
-    static public List<string[]> _testcases {
+    static public List<Preset> _presetTestCases {
       get {
-        return new List<string[]> {
-          new string[] { "Simple Block Pushing", _sbp, null, null, "right" },
-          new string[] { "PRBG filled", _extraprelude, _template, _game_prbg, "right" },
-          new string[] { "PRBGX extended", _extraprelude, _template_ext, _game_prbg_ext, "right" },
+        return new List<Preset> {
+          new Preset {
+            CaseName = "Simple Block Pushing",
+            PreludeTemplate = _sbp,
+            BodyTemplate = null,
+            SectionArgs = null,
+            Inputs = "right",
+          },
+          new Preset {
+            CaseName = "PRBG filled",
+            PreludeTemplate = _extraprelude,
+            BodyTemplate = _template,
+            SectionArgs = _game_prbg,
+            Inputs = "right",
+          },
+          new Preset {
+            CaseName = "PRBGX extended",
+            PreludeTemplate = _extraprelude,
+            BodyTemplate = _template_ext,
+            SectionArgs = _game_prbg_ext,
+            Inputs = "right",
+          },
+          //new Preset { "Simple Block Pushing", _sbp, null, null, "right" },
+          //new Preset { "PRBG filled", _extraprelude, _template, _game_prbg, "right" },
+          //new Preset { "PRBGX extended", _extraprelude, _template_ext, _game_prbg_ext, "right" },
         };
       }
     }
 
+    // TODO: 绕了一圈，为什么不直接返回_presetTestCases?
     public static IEnumerable<StaticTestCase> TestCases {
       get {
         foreach (var name in TestCaseNames)
@@ -51,35 +81,67 @@ namespace PuzzLangTest {
       }
     }
 
-    public static IList<string> TestCaseNames { get { return _testcases.Select(t => t[0]).ToList(); } }
+    public static IList<string> TestCaseNames {
+      get {
+        return _presetTestCases.Select(t => t.CaseName).ToList();
+      }
+    }
 
-    public static StaticTestCase GetTestCase(string key, string title = null, string newsubs = null) {
-      var testcase = _testcases.Find(t => t[0].Contains(key));
-      var subs = (newsubs == null) ? testcase[3] : FixSubs(testcase[3], newsubs);
-      var script = (subs == null) ? testcase[1] 
-        : MakeScript(title ?? testcase[0], testcase[1], testcase[2], subs);
+    /// <summary>
+    /// 挑选一个预设的测试用例，并可选地替换section内容
+    /// </summary>
+    /// <param name="key">用于在预设的testcase里弱匹配case name</param>
+    /// <param name="title">脚本的最终title</param>
+    /// <param name="newSectionArgs">替换section占位符的内容，比preset里的sectionArgs有更高优先级</param>
+    /// <returns></returns>
+    public static StaticTestCase GetTestCase(string key, string title = null, string newSectionArgs = null) {
+      var preset = _presetTestCases.Find(t => t.CaseName.Contains(key));
+      
+      // 如果没有指定新的section args，就用preset里的。否则用新的替换preset里的
+      var finalSectionArgs = string.IsNullOrEmpty(newSectionArgs) ? 
+        preset.SectionArgs : 
+        SubstituteArgs(preset.SectionArgs, newSectionArgs);
+
+      // 主体为空，只保留前导节？
+      var script = string.IsNullOrEmpty(finalSectionArgs) ?
+        preset.PreludeTemplate :
+        MakeScript(title ?? preset.CaseName, preset.PreludeTemplate, preset.BodyTemplate, finalSectionArgs);
+
       return new StaticTestCase {
-        Title = title ?? testcase[0],
+        Title = title ?? preset.CaseName,
         Script = script,
-        Inputs = testcase[3],
+        Inputs = preset.Inputs,
       };
     }
 
-    private static string FixSubs(string subs, string newsubs) {
+    private static string SubstituteArgs(string subs, string newsubs) {
+      if (string.IsNullOrEmpty(subs))
+        return newsubs;
+
       var lookup = subs.Split('@').ToDictionary(t => t.Substring(0,5), t => t);
       foreach (var s in newsubs.Split('@').Where(s => s.Length >= 4))
         lookup[s.Substring(0, 5)] = s;
       return lookup.Values.Join("@");
     }
-
+    
+    /// <summary>
+    /// 通过模板+参数生成游戏脚本
+    /// </summary>
+    /// <param name="title"></param>
+    /// <param name="prelude">前导节模板，title需要被替换</param>
+    /// <param name="template">文件体模板，只有section header。每个section的内容用占位符暂替</param>
+    /// <param name="args">section的内容，需要替换template里的占位符</param>
+    /// <returns></returns>
     static string MakeScript(string title, string prelude, string template, string args) {
       var script = String.Format(prelude, title) + template;
       //var game = template.Replace("(pre)", String.Format(prelude, title));
       // split args on ...@(sec)subs@... then 
-      foreach (var subs in args.Split('@')) {
-        var parts = subs.Split(new char[] { ':' }, 2);
+      var argsInList = args.Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries);
+      foreach (var arg in argsInList) {
+        var parts = arg.Split(new char[] { ':' }, 2);
         script = script.Replace(parts[0], parts[1]);
       }
+
       return script.Replace(";", Crlf);
     }
 

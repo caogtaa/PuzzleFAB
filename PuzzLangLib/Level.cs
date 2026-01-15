@@ -57,6 +57,7 @@ namespace PuzzLangLib {
     }
     internal int this[Locator locator] {
       get { return _locations[locator.Index, locator.Layer - 1]; }
+      set { _locations[locator.Index, locator.Layer - 1] = value; }
     }
     int GetCellIndex(int x, int y) {
       //if (!IsCellCoords(x, y)) throw Error.Assert("out of range");
