@@ -185,20 +185,24 @@ namespace PuzzLangLib {
             // check each cell of each subrule
             for (var riter = new RuleIterator { Rule = oldrule }; !riter.Done; riter.Step()) {
                 // Do no expansion on random actions
-                if (riter.ActionAtoms.Any(a => a.IsRandom))
+                if (riter.ActionAtoms.Any(a => a.IsRandom)) {
                     oldrule.Prefixes.Add(RulePrefix.Final);
-                else {
+                } else {
                     // check for action atom with ambiguous direction and no matching pattern atom
-                    var datom = riter.ActionAtoms.FirstOrDefault(a => _expanddirlookup.ContainsKey(a.Direction)
-                                                                      && !riter.PatternAtoms.Any(p =>
-                                                                          p.Matches(a) && p.Direction == a.Direction));
-                    if (datom != null)
+                    var datom = riter.ActionAtoms.FirstOrDefault(a => 
+                        _expanddirlookup.ContainsKey(a.Direction) &&
+                        !riter.PatternAtoms.Any(p => p.Matches(a) && p.Direction == a.Direction));
+                    if (datom != null) {
+                        // TODO: 出现action的Direction无法匹配pattern的Direction时，已经能确定一定解析出错了，为什么还要进行ExpandDirectionMulti？
                         return ExpandDirectionMulti(oldrule, datom.Direction);
+                    }
 
                     // check for action atom with property symbol and no matching pattern atom
-                    var satom = riter.ActionAtoms.FirstOrDefault(a => a.Symbol.Kind == SymbolKind.Property
-                                                                      && !a.IsNegated && !a.IsRandom &&
-                                                                      !riter.PatternAtoms.Any(p => p.Matches(a)));
+                    var satom = riter.ActionAtoms.FirstOrDefault(a =>
+                        a.Symbol.Kind == SymbolKind.Property &&
+                        !a.IsNegated && !a.IsRandom && 
+                        !riter.PatternAtoms.Any(p => p.Matches(a)));
+                    
                     if (satom != null) {
                         var newrules = ExpandSymbolMulti(oldrule, satom.Symbol) ?? ExpandPropertyMatcher(riter);
                         if (newrules == null)
@@ -307,8 +311,12 @@ namespace PuzzLangLib {
         // expand an ambiguous direction throughout a rule
         // error if more than one in pattern
         IList<AtomicRule> ExpandDirectionMulti(AtomicRule oldrule, Direction olddir) {
-            var pcells = oldrule.Patterns.SelectMany(p => p.Cells
-                .SelectMany(c => c.Where(a => a.Direction == olddir)));
+            // 遍历pattern里的每个RuleAtom，挑选出Direction == olddir的
+            var pcells = oldrule.Patterns.SelectMany(
+                p => p.Cells.SelectMany(
+                    c => c.Where(
+                        a => a.Direction == olddir)));
+
             if (pcells.Count() != 1)
                 _parser.CompileError("'{0}' in action cannot be matched", olddir);
 

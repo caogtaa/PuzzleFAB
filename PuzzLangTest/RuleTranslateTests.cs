@@ -330,9 +330,10 @@ namespace PuzzLangTest {
                     presetName + ":" + method,
                     ruleTemplate.Fmt(kthOrigin(i)));
 
+                var actualRules = GetRuleExpansions(testCaseForActual);
+
                 // 对expectRules做一次展开，因为是幂等的，预期结果不会变但是方便比较
                 var expectRules = GetRuleExpansions(testCaseForExpect);
-                var actualRules = GetRuleExpansions(testCaseForActual);
                 Assert.AreEqual(expectedRuleCount, expectRules.Count, kthOrigin(i));
                 Assert.AreEqual(expectedRuleCount, actualRules.Count, kthOrigin(i));
                 for (var j = 0; j < expectedRuleCount; j++) {
