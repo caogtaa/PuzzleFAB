@@ -88,7 +88,7 @@ namespace PuzzLangTest {
     }
 
     /// <summary>
-    /// 挑选一个预设的测试用例，并可选地替换section内容
+    /// 挑选一个预设的游戏模板，并可选地替换section内容
     /// </summary>
     /// <param name="key">用于在预设的testcase里弱匹配case name</param>
     /// <param name="title">脚本的最终title</param>

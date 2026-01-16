@@ -137,7 +137,9 @@ namespace PuzzLangTest {
           "down[ action p | ] -> [ | ]"
         },
       };
-      DoExpansionTests("PRBG", template, tests.GetLength(0), i => tests[i, 1], i => tests[i, 0]);
+      DoExpansionTests("PRBG", template, tests.GetLength(0),
+        i => tests[i, 1],
+        i => tests[i, 0]);
     }
 
     [TestMethod]
@@ -335,18 +337,33 @@ namespace PuzzLangTest {
       DoExpansionTests("PRBG", template, tests.GetLength(0), i => tests[i, 1], i => tests[i, 0]);
     }
 
-    void DoExpansionTests(string testbase, string template, int count, Func<int,string> expecteds, Func<int, string> actuals, 
-      [CallerMemberName] string method = "") {
-      for (int i = 0; i < count; i++) {
-        var nexp = expecteds(i).Split(';').Length;
-        var tcexp = StaticTestData.GetTestCase(testbase, testbase + ":" + method, template.Fmt(expecteds(i)));
-        var exp = GetRuleExpansions(tcexp);
-        var tcact = StaticTestData.GetTestCase(testbase, testbase + ":" + method, template.Fmt(actuals(i)));
-        var act = GetRuleExpansions(tcact);
-        Assert.AreEqual(nexp, exp.Count, actuals(i));
-        Assert.AreEqual(nexp, act.Count, actuals(i));
-        for (var j = 0; j < nexp; j++)
-          Assert.AreEqual(exp[j].After(":"), act[j].After(":"), actuals(i));
+    void DoExpansionTests(
+      string presetName, string ruleTemplate, int testCount, 
+      Func<int, string> kthExpected, 
+      Func<int, string> kthOrigin, 
+      [CallerMemberName] string method = "")
+    {
+      for (int i = 0; i < testCount; i++) {
+        // var nexp = kthExpected(i).Split(';').Length;
+        var expectedRuleCount = kthExpected(i).Count(c => c == ';') + 1;
+        var testCaseForExpect = StaticTestData.GetTestCase(
+          presetName,
+          presetName + ":" + method,
+          ruleTemplate.Fmt(kthExpected(i)));
+
+        var testCaseForActual = StaticTestData.GetTestCase(
+          presetName,
+          presetName + ":" + method,
+          ruleTemplate.Fmt(kthOrigin(i)));
+
+        // 对expectRules做一次展开，因为是幂等的，预期结果不会变但是方便比较
+        var expectRules = GetRuleExpansions(testCaseForExpect);
+        var actualRules = GetRuleExpansions(testCaseForActual);
+        Assert.AreEqual(expectedRuleCount, expectRules.Count, kthOrigin(i));
+        Assert.AreEqual(expectedRuleCount, actualRules.Count, kthOrigin(i));
+        for (var j = 0; j < expectedRuleCount; j++) {
+          Assert.AreEqual(expectRules[j].After(":"), actualRules[j].After(":"), kthOrigin(i));
+        }
       }
     }
 
