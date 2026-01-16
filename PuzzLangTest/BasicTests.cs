@@ -9,6 +9,7 @@
 /// This software is distributed in the hope that it will be useful, but with
 /// absolutely no warranty, express or implied. See the licence for details.
 /// 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,41 +17,42 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PuzzLangLib;
 
 namespace PuzzLangTest {
-  [TestClass]
-  public class BasicTests {
-    [ClassInitialize]
-    static public void ClassSetup(TestContext context) {
-      // disable for now -- test framework weird results
-      //var path ="testdata.json";
-      //JsonTestData.Setup(new StreamReader(path));
-    }
-    [TestMethod]
-    public void SingleCase() {
-      var data = StaticTestData.GetTestCase("Simple");
-      var game = new StringReader(data.Script);
-      var compiler = Compiler.Compile("unknown", game, Console.Out);
-      Assert.IsTrue(compiler.Success, data.Title);
-      compiler.Model.Execute("1", data.Inputs);
-      Assert.IsTrue(compiler.Success, data.Title);
-    }
+    [TestClass]
+    public class BasicTests {
+        [ClassInitialize]
+        static public void ClassSetup(TestContext context) {
+            // disable for now -- test framework weird results
+            //var path ="testdata.json";
+            //JsonTestData.Setup(new StreamReader(path));
+        }
 
-    [DataRow("bad data row")]
-    [DataTestMethod]
-    public void BadDataRow(string arg) {
-      var game = new StringReader(arg);
-      var compiler = Compiler.Compile("unknown", game, Console.Out);
-      Assert.IsFalse(compiler.Success);
-    }
+        [TestMethod]
+        public void SingleCase() {
+            var data = StaticTestData.GetTestCase("Simple");
+            var game = new StringReader(data.Script);
+            var compiler = Compiler.Compile("unknown", game, Console.Out);
+            Assert.IsTrue(compiler.Success, data.Title);
+            compiler.Model.Execute("1", data.Inputs);
+            Assert.IsTrue(compiler.Success, data.Title);
+        }
 
-    [TestMethod]
-    [DynamicData (nameof(SomeBadMethod))]
-    public void BadMethod(string arg) {
-      var game = new StringReader(arg);
-      var compiler = Compiler.Compile("unknown", game, Console.Out);
-      Assert.IsFalse(compiler.Success);
-    }
+        [DataRow("bad data row")]
+        [DataTestMethod]
+        public void BadDataRow(string arg) {
+            var game = new StringReader(arg);
+            var compiler = Compiler.Compile("unknown", game, Console.Out);
+            Assert.IsFalse(compiler.Success);
+        }
 
-    // CHECK: spits out quantities of text (>449)
+        [TestMethod]
+        [DynamicData(nameof(SomeBadMethod))]
+        public void BadMethod(string arg) {
+            var game = new StringReader(arg);
+            var compiler = Compiler.Compile("unknown", game, Console.Out);
+            Assert.IsFalse(compiler.Success);
+        }
+
+        // CHECK: spits out quantities of text (>449)
 #if GRIEF_NEEDED
     [TestMethod]
     [DynamicData(nameof(TestCasesArray))]
@@ -62,16 +64,16 @@ namespace PuzzLangTest {
       Assert.IsTrue(compiler.Success, title);
     }
 #endif
-    // wrapper as dictated by dynamic data
-    public static IEnumerable<string[]> TestCasesArray {
-      get {
-        foreach (var testcase in StaticTestData.TestCases) { 
-          yield return new string[] { testcase.Title, testcase.Script, testcase.Inputs };
+        // wrapper as dictated by dynamic data
+        public static IEnumerable<string[]> TestCasesArray {
+            get {
+                foreach (var testcase in StaticTestData.TestCases) {
+                    yield return new string[] { testcase.Title, testcase.Script, testcase.Inputs };
+                }
+            }
         }
-      }
-    }
 
-    // CHECK: hopeless error display with massive icons
+        // CHECK: hopeless error display with massive icons
 #if GRIEF_NEEDED
     [TestMethod]
     [DynamicData(nameof(JsonTestCases))]
@@ -84,26 +86,21 @@ namespace PuzzLangTest {
     }
 #endif
 
-    // sources of test data
-    // this is what works. Method does not (!?)
-    static IEnumerable<object[]> SomeBadMethod {
-      get {
-        yield return new object[] { "asdf" };
-      }
-    }
+        // sources of test data
+        // this is what works. Method does not (!?)
+        static IEnumerable<object[]> SomeBadMethod {
+            get { yield return new object[] { "asdf" }; }
+        }
 
-    static IEnumerable<object[]> JsonTestCases {
-      get {
-        foreach (var testcase in JsonTestData.StringTestCases)
-          yield return testcase;
-      }
-    }
+        static IEnumerable<object[]> JsonTestCases {
+            get {
+                foreach (var testcase in JsonTestData.StringTestCases)
+                    yield return testcase;
+            }
+        }
 
-    static IEnumerable<object[]> DemoTestCases {
-      get {
-        yield return new object[] { "asdf" };
-      }
+        static IEnumerable<object[]> DemoTestCases {
+            get { yield return new object[] { "asdf" }; }
+        }
     }
-
-  }
 }

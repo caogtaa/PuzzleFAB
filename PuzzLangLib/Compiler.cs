@@ -9,6 +9,7 @@
 /// This software is distributed in the hope that it will be useful, but with
 /// absolutely no warranty, express or implied. See the licence for details.
 /// 
+
 using System;
 using System.IO;
 using Pegasus.Common;
@@ -17,149 +18,163 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace PuzzLangLib {
-  public class Compiler {
-    // source name to display in messages
-    public string SourceName { get; private set; }
-    // settings to use for compile and model
-    public IList<Pair<string, string>> Settings = null;
-    // output produced during compile
-    public TextWriter Out { get; private set; }
-    // result of compile, if successful
-    public GameModel Model { get; private set; }
-    // result of compile
-    public bool Success { get { return _parser.ErrorCount == 0; } }
-    // explanation, if compile failed
-    public string Message { get; private set; }
-    // for testing purposes only
-    public IList<string> RuleExpansions { get { return _parser.AtomicRules.Select(r=>r.ToString()).ToList(); } }
+    public class Compiler {
+        // source name to display in messages
+        public string SourceName { get; private set; }
 
-    internal ParseManager _parser;
+        // settings to use for compile and model
+        public IList<Pair<string, string>> Settings = null;
 
-    public static Compiler Compile(string sourcename, TextReader reader, TextWriter output, 
-      IList<Pair<string,string>> settings = null) {
-      var ret = new Compiler {
-        SourceName = sourcename,
-        Out = output,
-        Settings = settings,
-      };
-      ret.Compile(reader);
-      if (ret.Success)
-        ret.Model = GameModel.Create(output, ret._parser.GameDef, sourcename);
-      return ret;
-    }
+        // output produced during compile
+        public TextWriter Out { get; private set; }
 
-    // encode level per PuzzleScript format
-    public string EncodeLevel(Level level) {
-      var sw = new StringWriter();
-      var seenlookup = new Dictionary<string, int>();
-      var seen = 0;
-      var linebreak = 0;
-      for (int x = 0; x < level.Width; x++) {
-        for (int y = 0; y < level.Height; y++) {
-          var objs = new List<string>();
-          for (int z = 1; z <= level.Depth; z++) {
-            var obj = level[x, y, z];
-            if (obj != 0) {
-              objs.Add(_parser.GetSymbolName(obj).ToLower());
+        // result of compile, if successful
+        public GameModel Model { get; private set; }
+
+        // result of compile
+        public bool Success {
+            get { return _parser.ErrorCount == 0; }
+        }
+
+        // explanation, if compile failed
+        public string Message { get; private set; }
+
+        // for testing purposes only
+        public IList<string> RuleExpansions {
+            get { return _parser.AtomicRules.Select(r => r.ToString()).ToList(); }
+        }
+
+        internal ParseManager _parser;
+
+        public static Compiler Compile(string sourcename, TextReader reader, TextWriter output,
+            IList<Pair<string, string>> settings = null) {
+            var ret = new Compiler {
+                SourceName = sourcename,
+                Out = output,
+                Settings = settings,
+            };
+            ret.Compile(reader);
+            if (ret.Success)
+                ret.Model = GameModel.Create(output, ret._parser.GameDef, sourcename);
+            return ret;
+        }
+
+        // encode level per PuzzleScript format
+        public string EncodeLevel(Level level) {
+            var sw = new StringWriter();
+            var seenlookup = new Dictionary<string, int>();
+            var seen = 0;
+            var linebreak = 0;
+            for (int x = 0; x < level.Width; x++) {
+                for (int y = 0; y < level.Height; y++) {
+                    var objs = new List<string>();
+                    for (int z = 1; z <= level.Depth; z++) {
+                        var obj = level[x, y, z];
+                        if (obj != 0) {
+                            objs.Add(_parser.GetSymbolName(obj).ToLower());
+                        }
+                    }
+
+                    objs.Sort();
+                    var name = objs.Join(" ");
+                    if (!seenlookup.ContainsKey(name)) {
+                        seenlookup[name] = seen++;
+                        sw.Write(name + ":");
+                    }
+
+                    sw.Write(seenlookup[name] + ",");
+                    if (++linebreak % level.Width == 0) sw.Write("\n");
+                }
             }
-          }
-          objs.Sort();
-          var name = objs.Join(" ");
-          if (!seenlookup.ContainsKey(name)) {
-            seenlookup[name] = seen++;
-            sw.Write(name + ":");
-          }
-          sw.Write(seenlookup[name] + ",");
-          if (++linebreak % level.Width == 0) sw.Write("\n");
+
+            return sw.ToString();
         }
-      }
-      return sw.ToString();
-    }
 
-    // decode level back to compiler input (but unknown combos will be '?')
-    public string DecodeLevel(Level level) {
-      var sw = new StringWriter();
-      var lookup = _parser.Symbols
-        .Where(s => s.Name.Length == 1)
-        .ToDictionary(k => k.ObjectIds.OrderBy(i => i).Join(), v => v.Name);
-      for (int x = 0; x < level.Length; x++) {
-        if (x > 0 && x % level.Width == 0) sw.Write(" ;");
-        var objs = level.GetObjects(x).OrderBy(i => i);
-        var objsexbg = (objs.Count() == 1) ? objs : objs.Skip(1);
-        sw.Write(lookup.SafeLookup(objsexbg.Join()) ?? "?");
-      }
-      return sw.ToString();
-    }
+        // decode level back to compiler input (but unknown combos will be '?')
+        public string DecodeLevel(Level level) {
+            var sw = new StringWriter();
+            var lookup = _parser.Symbols
+                .Where(s => s.Name.Length == 1)
+                .ToDictionary(k => k.ObjectIds.OrderBy(i => i).Join(), v => v.Name);
+            for (int x = 0; x < level.Length; x++) {
+                if (x > 0 && x % level.Width == 0) sw.Write(" ;");
+                var objs = level.GetObjects(x).OrderBy(i => i);
+                var objsexbg = (objs.Count() == 1) ? objs : objs.Skip(1);
+                sw.Write(lookup.SafeLookup(objsexbg.Join()) ?? "?");
+            }
 
-    /// <summary>
-    /// 尝试找到一个单字符symbol来表示给定的object id列表，如果不存在这样的symbol则返回'?'
-    /// NOTE: 这个方法比较慢，只在UT里使用
-    /// </summary>
-    /// <param name="ids"></param>
-    /// <returns></returns>
-    public string ObjectIdsToSymbol(IList<int> ids) {
-      var sw = new StringWriter();
-      var lookup = _parser.Symbols
-        .Where(s => s.Name.Length == 1)
-        .ToDictionary(k => k.ObjectIds.OrderBy(i => i).Join(), v => v.Name);
-      
-      return lookup.SafeLookup(ids.OrderBy(i => i).Join()) ?? "?";
-    }
-
-    /// <summary>
-    /// 比较object id列表和一个symbole列表，判断是否等价，忽略顺序和重复
-    /// </summary>
-    /// <param name="ids"></param>
-    /// <param name="symbols"></param>
-    /// <param name="ignoreBg">是否忽略背景符号</param>
-    /// <returns></returns>
-    public bool SymbolEquals(IList<int> ids, string symbols, bool ignoreBg = true) {
-      var ids1 = ids.ToHashSet();
-      var ids2 = new HashSet<int>();
-      foreach (var c in symbols) {
-        ids2.UnionWith(_parser.ParseAggregate(c.ToString()));
-      }
-
-      if (ignoreBg) {
-        var bgSymbol = _parser.ParseSymbol("Background");
-        ids1.ExceptWith(bgSymbol.ObjectIds);
-        ids2.ExceptWith(bgSymbol.ObjectIds);
-      }
-
-      return ids1.SetEquals(ids2);
-    }
-
-    void Compile(TextReader reader) {
-      _parser = ParseManager.Create(SourceName, Out, Settings);
-      var program = reader.ReadToEnd() + "\r\n";  // just too hard to parse missing EOL
-      try {
-        _parser.PegParser.Parse(program);
-        _parser.CheckData();
-      } catch (FormatException e) {
-        if (e.Data.Contains("cursor")) {
-          var state = e.Data["cursor"] as Cursor;
-          var offset = Math.Max(0, state.Location - 30);
-          var source = (program.Substring(offset, state.Location - offset)
-            + "(^)" + program.Substring(state.Location))
-            .Replace("\r", "").Replace("\n", ";");
-          Message = "{0}\n*** '{1}' at {2},{3}: parse error: {4}".Fmt(source.Shorten(78),
-            SourceName, state.Line, state.Column, e.Message);
-          Out.WriteLine(Message);
-          ++_parser.ErrorCount;
-        } else {
-          Out.WriteLine($"*** '{SourceName}': unexpected exception: {e.ToString()}");
-          ++_parser.ErrorCount;
+            return sw.ToString();
         }
-      } catch (DOLEException e) {
-        Message = e.Message;
-        Out.WriteLine(Message);
-        ++_parser.ErrorCount;
-      }
-      var fmt = _parser.ErrorCount > 0 ? "Compiled '{0}' with errors, count: {1} warnings: {2}."
-        : _parser.WarningCount > 0 ? "Compiled '{0}' with warnings, count: {2}." 
-        : "Compiled '{0}' with no errors, {3} rules.";
-      Out.WriteLine(fmt, SourceName, _parser.ErrorCount, _parser.WarningCount, _parser.RuleCount);
-    }
-  }
 
+        /// <summary>
+        /// 尝试找到一个单字符symbol来表示给定的object id列表，如果不存在这样的symbol则返回'?'
+        /// NOTE: 这个方法比较慢，只在UT里使用
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public string ObjectIdsToSymbol(IList<int> ids) {
+            var sw = new StringWriter();
+            var lookup = _parser.Symbols
+                .Where(s => s.Name.Length == 1)
+                .ToDictionary(k => k.ObjectIds.OrderBy(i => i).Join(), v => v.Name);
+
+            return lookup.SafeLookup(ids.OrderBy(i => i).Join()) ?? "?";
+        }
+
+        /// <summary>
+        /// 比较object id列表和一个symbole列表，判断是否等价，忽略顺序和重复
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <param name="symbols"></param>
+        /// <param name="ignoreBg">是否忽略背景符号</param>
+        /// <returns></returns>
+        public bool SymbolEquals(IList<int> ids, string symbols, bool ignoreBg = true) {
+            var ids1 = ids.ToHashSet();
+            var ids2 = new HashSet<int>();
+            foreach (var c in symbols) {
+                ids2.UnionWith(_parser.ParseAggregate(c.ToString()));
+            }
+
+            if (ignoreBg) {
+                var bgSymbol = _parser.ParseSymbol("Background");
+                ids1.ExceptWith(bgSymbol.ObjectIds);
+                ids2.ExceptWith(bgSymbol.ObjectIds);
+            }
+
+            return ids1.SetEquals(ids2);
+        }
+
+        void Compile(TextReader reader) {
+            _parser = ParseManager.Create(SourceName, Out, Settings);
+            var program = reader.ReadToEnd() + "\r\n"; // just too hard to parse missing EOL
+            try {
+                _parser.PegParser.Parse(program);
+                _parser.CheckData();
+            } catch (FormatException e) {
+                if (e.Data.Contains("cursor")) {
+                    var state = e.Data["cursor"] as Cursor;
+                    var offset = Math.Max(0, state.Location - 30);
+                    var source = (program.Substring(offset, state.Location - offset)
+                                  + "(^)" + program.Substring(state.Location))
+                        .Replace("\r", "").Replace("\n", ";");
+                    Message = "{0}\n*** '{1}' at {2},{3}: parse error: {4}".Fmt(source.Shorten(78),
+                        SourceName, state.Line, state.Column, e.Message);
+                    Out.WriteLine(Message);
+                    ++_parser.ErrorCount;
+                } else {
+                    Out.WriteLine($"*** '{SourceName}': unexpected exception: {e.ToString()}");
+                    ++_parser.ErrorCount;
+                }
+            } catch (DOLEException e) {
+                Message = e.Message;
+                Out.WriteLine(Message);
+                ++_parser.ErrorCount;
+            }
+
+            var fmt = _parser.ErrorCount > 0 ? "Compiled '{0}' with errors, count: {1} warnings: {2}."
+                : _parser.WarningCount > 0 ? "Compiled '{0}' with warnings, count: {2}."
+                : "Compiled '{0}' with no errors, {3} rules.";
+            Out.WriteLine(fmt, SourceName, _parser.ErrorCount, _parser.WarningCount, _parser.RuleCount);
+        }
+    }
 }
