@@ -169,7 +169,8 @@ namespace PuzzLangLib {
             _input = input;
             if (intparam != null)
                 ApplyClick(input, intparam.Value);
-            else ApplyInput(input);
+            else
+                ApplyInput(input);
             ApplyRules();
             _playerindexes = FindPlayers();
             ScreenIndex = CalcScreenIndex();
@@ -213,10 +214,12 @@ namespace PuzzLangLib {
                             }
 
                             break;
-                        } else throw Error.Assert($"cmd {cmd}");
+                        } else
+                            throw Error.Assert($"cmd {cmd}");
                 }
 
-                if (_result != StateResult.Success) break;
+                if (_result != StateResult.Success)
+                    break;
             }
 
             var now2 = DateTime.Now;
@@ -237,7 +240,8 @@ namespace PuzzLangLib {
 
         // apply input to any clickables found at this location
         void ApplyClick(Direction input, int cellindex) {
-            if (!GameDef.MoveDirections.Contains(input)) return;
+            if (!GameDef.MoveDirections.Contains(input))
+                return;
 
             Logger.WriteLine(3, "ApplyClick {0} {1}", input, cellindex);
             foreach (var obj in _level.GetObjects(cellindex)) {
@@ -250,7 +254,8 @@ namespace PuzzLangLib {
 
         // apply input to every player and add to movers list
         void ApplyInput(Direction input) {
-            if (!GameDef.MoveDirections.Contains(input)) return;
+            if (!GameDef.MoveDirections.Contains(input))
+                return;
             //if (_gamedef.Players == null) return;
             Logger.WriteLine(3, "ApplyInput {0}", input);
             foreach (var player in _gamedef.Players)
@@ -271,7 +276,8 @@ namespace PuzzLangLib {
         int CalcScreenIndex() {
             var flick = _gamedef.GetSetting(OptionSetting.flickscreen, (Pair<int, int>)null);
             var zoom = _gamedef.GetSetting(OptionSetting.zoomscreen, (Pair<int, int>)null);
-            if ((flick == null && zoom == null) || !PlayerIndexes.Any()) return 0;
+            if ((flick == null && zoom == null) || !PlayerIndexes.Any())
+                return 0;
             var pindex = PlayerIndexes[0];
             var width = _level.Width;
             var height = _level.Height;
@@ -309,7 +315,8 @@ namespace PuzzLangLib {
                 // make the moves
                 var disablecount = _disabledgrouplookup.Count;
                 ApplyMoves();
-                if (disablecount == _disabledgrouplookup.Count) break;
+                if (disablecount == _disabledgrouplookup.Count)
+                    break;
                 LostRuleCounter += _rulestate.PatternCounter;
             }
 
@@ -354,7 +361,8 @@ namespace PuzzLangLib {
                 } else {
                     int gno;
                     for (var retry = 0;; ++retry) {
-                        if (retry > 100) throw Error.Fatal("too many rule loops: <{0}>", group);
+                        if (retry > 100)
+                            throw Error.Fatal("too many rule loops: <{0}>", group);
                         Logger.WriteLine(3, "Start loop {0} retry={1}", loop, retry);
 
                         // do all the rule groups in the loop block
@@ -364,7 +372,8 @@ namespace PuzzLangLib {
                                 groupchange = true;
                         }
 
-                        if (!groupchange) break;
+                        if (!groupchange)
+                            break;
                         _rulestate.HasChanged = true;
                     }
 
@@ -381,7 +390,8 @@ namespace PuzzLangLib {
             Logger.WriteLine(4, "ApplyRuleGroup {0} {1}", _rulestate, group);
 
             // skip this group -- it failed rigid previously
-            if (_disabledgrouplookup.Contains(group)) return false;
+            if (_disabledgrouplookup.Contains(group))
+                return false;
 
             var groupchange = false;
 
@@ -400,13 +410,15 @@ namespace PuzzLangLib {
                 // loop until no more changes, return true if there were any
             } else {
                 for (var retry = 0;; ++retry) {
-                    if (retry > 200) throw Error.Fatal("too many rule group retries: <{0}>", group);
+                    if (retry > 200)
+                        throw Error.Fatal("too many rule group retries: <{0}>", group);
                     var matches = _rulestate.FindMatches(group);
                     var rulechange = _rulestate.DoActions(group, matches);
                     groupchange |= rulechange;
                     if (retry == 0) // just the first time
                         _rulestate.DoCommands(group, matches);
-                    if (!rulechange || group.IsFinal) break;
+                    if (!rulechange || group.IsFinal)
+                        break;
                 }
             }
 
@@ -424,10 +436,12 @@ namespace PuzzLangLib {
             foreach (var mover in _movers.ToArray()) {
                 var newloc = Destination(mover);
                 if (mover.Direction == Direction.None || newloc.IsNull) {
-                    if (NoFailRigid(mover)) return;
+                    if (NoFailRigid(mover))
+                        return;
                     _movers.Remove(mover);
                 } else if (destinations.Contains(newloc)) {
-                    if (NoFailRigid(mover)) return;
+                    if (NoFailRigid(mover))
+                        return;
                     _model.VerboseLog("Blocked duplicate move {0} to {1}", _gamedef.ShowName(mover.ObjectId),
                         mover.CellIndex);
                     _movers.Remove(mover);
@@ -444,10 +458,12 @@ namespace PuzzLangLib {
             // 4. Repeat step 3 until none
             while (true) {
                 var blocked = _movers.Where(m => _level[Destination(m)] != 0);
-                if (!blocked.Any()) break;
+                if (!blocked.Any())
+                    break;
                 foreach (var mover in blocked.ToArray()) {
                     _levelstate.SetCell(mover.CellIndex, mover.Layer, mover.ObjectId);
-                    if (NoFailRigid(mover)) return;
+                    if (NoFailRigid(mover))
+                        return;
                     Logger.WriteLine(3, "Blocked  move {0} to {1}", _gamedef.ShowName(mover.ObjectId), mover.CellIndex);
                     _movers.Remove(mover);
                 }
@@ -472,7 +488,8 @@ namespace PuzzLangLib {
         bool NoFailRigid(Mover mover) {
             var rulegroup = mover.RuleGroup;
             _rulestate.CheckTrigger(SoundTrigger.Cantmove, mover.ObjectId, mover.Direction);
-            if (rulegroup == null || !rulegroup.IsRigid) return false;
+            if (rulegroup == null || !rulegroup.IsRigid)
+                return false;
             _model.VerboseLog("Rule group {0} disabled", rulegroup.Id);
             _disabledgrouplookup.Add(rulegroup);
             return true;
@@ -490,13 +507,15 @@ namespace PuzzLangLib {
             bool? result = null;
             for (int index = 0; index < _level.Length; index++) {
                 var objfound = winco.objectIds.Where(o => ObjectFound(o, index)).Count() > 0;
-                if (winco.otherObjectIds == null) result = _wincolookup[!objfound ? 0 : 1, lookupcol];
+                if (winco.otherObjectIds == null)
+                    result = _wincolookup[!objfound ? 0 : 1, lookupcol];
                 else {
                     var targfound = winco.otherObjectIds.Where(o => ObjectFound(o, index)).Count() > 0;
                     result = _wincolookup[!objfound ? 0 : !targfound ? 1 : 2, lookupcol];
                 }
 
-                if (result != null) return result.Value;
+                if (result != null)
+                    return result.Value;
             }
 
             return _wincolookup[3, lookupcol].Value;

@@ -98,7 +98,8 @@ namespace DOLE {
         }
 
         public static int Pop() {
-            if (_sublevels.Count == 1) return 0;
+            if (_sublevels.Count == 1)
+                return 0;
             var ret = _sublevels[0];
             _sublevels.RemoveAt(0);
             return ret;
@@ -123,12 +124,14 @@ namespace DOLE {
         }
 
         public static void Write(int level, string format, params object[] args) {
-            if (level > Level) return;
+            if (level > Level)
+                return;
             Write(level, String.Format(format, args), false);
         }
 
         public static void WriteLine(int level, string format, params object[] args) {
-            if (level > Level) return;
+            if (level > Level)
+                return;
             Write(level, String.Format(format, args), true);
         }
 
@@ -165,12 +168,14 @@ namespace DOLE {
 
         // common writer
         public static void Write(int level, string msg, bool newline) {
-            if (level > Level) return; // base level controls what is logged
+            if (level > Level)
+                return; // base level controls what is logged
             _timenow = DateTime.Now;
             for (int i = 0; i < _levels.Count; ++i) {
                 if (level <= _levels[i]) {
                     if (newline) {
-                        if (_neednl) _tws[i].WriteLine();
+                        if (_neednl)
+                            _tws[i].WriteLine();
                         _tws[i].WriteLine(Pad(level, msg));
                     } else
                         _tws[i].Write((_neednl) ? msg + ";" : Pad(level, msg) + ";");
@@ -206,7 +211,8 @@ namespace DOLE {
             if (c == '\n') {
                 Trace.WriteLine("|" + _sb.ToString());
                 _sb.Length = 0; // .NET 3.5
-            } else if (c != '\r') _sb.Append(c);
+            } else if (c != '\r')
+                _sb.Append(c);
         }
     }
 }

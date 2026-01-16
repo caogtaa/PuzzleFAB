@@ -158,7 +158,8 @@ namespace PuzzLangLib {
             var newrule = rule.Clone();
             newrule.Directions = new HashSet<Direction>() { ruledir };
             MakeAbsolute(newrule.Patterns, ruledir);
-            if (newrule.HasAction) MakeAbsolute(newrule.Actions, ruledir);
+            if (newrule.HasAction)
+                MakeAbsolute(newrule.Actions, ruledir);
             return newrule;
         }
 
@@ -202,7 +203,8 @@ namespace PuzzLangLib {
                         var newrules = ExpandSymbolMulti(oldrule, satom.Symbol) ?? ExpandPropertyMatcher(riter);
                         if (newrules == null)
                             _parser.CompileError("'{0}' in action cannot be matched", satom.Symbol.Name);
-                        else return newrules;
+                        else
+                            return newrules;
                     }
                 }
             }
@@ -269,7 +271,8 @@ namespace PuzzLangLib {
         IList<AtomicRule> ExpandSymbolMulti(AtomicRule oldrule, ObjectSymbol oldsym) {
             var pcells = oldrule.Patterns.SelectMany(p => p.Cells
                 .SelectMany(c => c.Where(a => a.Symbol == oldsym && !a.IsNegated)));
-            if (pcells.Count() != 1) return null;
+            if (pcells.Count() != 1)
+                return null;
 
             // expand one rule per object id
             var newrules = new List<AtomicRule>();
@@ -292,7 +295,8 @@ namespace PuzzLangLib {
             IList<RuleAtom> newcell = null;
             for (var i = 0; i < cell.Count; i++) {
                 if (cell[i].Symbol == oldsym && !cell[i].IsNegated) {
-                    if (newcell == null) newcell = new List<RuleAtom>(cell); // BUG: could lose atoms
+                    if (newcell == null)
+                        newcell = new List<RuleAtom>(cell); // BUG: could lose atoms
                     newcell[i] = cell[i].Clone(_parser.GetSymbol(newobj));
                 }
             }
@@ -329,7 +333,8 @@ namespace PuzzLangLib {
             IList<RuleAtom> newcell = null;
             for (var i = 0; i < cell.Count; i++) {
                 if (cell[i].Direction == olddir) {
-                    if (newcell == null) newcell = new List<RuleAtom>(cell);
+                    if (newcell == null)
+                        newcell = new List<RuleAtom>(cell);
                     newcell[i] = cell[i].Clone(newdir);
                 }
             }
@@ -342,7 +347,8 @@ namespace PuzzLangLib {
         // compile a rule
         internal CompiledRule CompileRule(AtomicRule rule) {
             _parser.DebugLog("{0}", rule);
-            if (rule.Directions.Count != 1) throw Error.Assert("direction count");
+            if (rule.Directions.Count != 1)
+                throw Error.Assert("direction count");
             for (int i = 0; i < rule.Patterns.Count; i++) {
                 // TODO: check singleton rules here
             }
@@ -370,8 +376,10 @@ namespace PuzzLangLib {
                 // each separate cell in pattern [ | cell | ]
                 for (int cellx = 0; cellx < subrule.Cells.Count; cellx++) {
                     var cell = subrule.Cells[cellx];
-                    if (cellx == 0) EmitStart();
-                    else EmitStepNext(ruledir);
+                    if (cellx == 0)
+                        EmitStart();
+                    else
+                        EmitStepNext(ruledir);
                     var ellipsis = false;
                     if (cell.Count == 1 && cell[0].IsEllipsis) {
                         ellipsis = true;
@@ -380,10 +388,14 @@ namespace PuzzLangLib {
 
                     for (int atomx = 0; atomx < cell.Count; atomx++) {
                         var atom = cell[atomx];
-                        if (cellx == 0 && atomx == 0) EmitFind(atom);
-                        else if (ellipsis && atomx == 0) EmitScan(atom, ruledir);
-                        else if (atom.Symbol.Kind == SymbolKind.RefObject) EmitTestRef(atom);
-                        else EmitTest(atom);
+                        if (cellx == 0 && atomx == 0)
+                            EmitFind(atom);
+                        else if (ellipsis && atomx == 0)
+                            EmitScan(atom, ruledir);
+                        else if (atom.Symbol.Kind == SymbolKind.RefObject)
+                            EmitTestRef(atom);
+                        else
+                            EmitTest(atom);
                         if (atom.HasVariable) { // TODO: non-trail vars?
                             atom.Variable.SetVarRef(trailvar);
                             EmitStoreRef(trailvar, atom.Symbol.ObjectIds);
@@ -398,7 +410,8 @@ namespace PuzzLangLib {
                 }
             }
 
-            if (Logger.Level >= 3) _gen.Decode("pattern", Logger.Out);
+            if (Logger.Level >= 3)
+                _gen.Decode("pattern", Logger.Out);
             return _gen.Code;
         }
 
@@ -430,7 +443,8 @@ namespace PuzzLangLib {
                 trailindex += picells.Count;
             }
 
-            if (Logger.Level >= 3) _gen.Decode("action", Logger.Out);
+            if (Logger.Level >= 3)
+                _gen.Decode("action", Logger.Out);
             return _gen.Code;
         }
 
@@ -446,7 +460,8 @@ namespace PuzzLangLib {
                     var aatom = aatoms.FirstOrDefault(a => a.Symbol == patom.Symbol);
                     if (aatom == null)
                         CompilePatternOnly(patom);
-                    else CompilePatternAction(patom, aatom);
+                    else
+                        CompilePatternAction(patom, aatom);
                 }
 
                 foreach (var aatom in aatoms
@@ -470,13 +485,15 @@ namespace PuzzLangLib {
             } else {
                 if (aatom.IsNegated)
                     EmitDestroy(aatom.Symbol);
-                else EmitCreate(aatom.Symbol, aatom.Direction);
+                else
+                    EmitCreate(aatom.Symbol, aatom.Direction);
             }
         }
 
         // matching pattern and action depend on NO or direction
         void CompilePatternAction(RuleAtom patom, RuleAtom aatom) {
-            if (patom.IsNegated) CompileActionOnly(aatom);
+            if (patom.IsNegated)
+                CompileActionOnly(aatom);
             else if (aatom.IsNegated)
                 EmitDestroy(aatom.Symbol); // TEST: ->[no x] deletes x
             else if (patom.Direction != aatom.Direction) {
@@ -501,14 +518,16 @@ namespace PuzzLangLib {
                 EmitCommand(command.commandId, command.text, command.symbol, command.funcCall);
             }
 
-            if (Logger.Level >= 3) _gen.Decode("command", Logger.Out);
+            if (Logger.Level >= 3)
+                _gen.Decode("command", Logger.Out);
             return _gen.Code;
         }
 
         // Rotate a relative object direction according to the rule direction
         Direction Rotate(Direction objdir, Direction ruledir) {
             // if the rule has no direction or the object direction is not relative, use as is
-            if (!_rotatebylookup.ContainsKey(objdir)) return objdir;
+            if (!_rotatebylookup.ContainsKey(objdir))
+                return objdir;
             if (ruledir == Direction.None) {
                 _parser.CompileError("relative direction '{0}' not allowed here", objdir);
                 return objdir;
@@ -546,7 +565,8 @@ namespace PuzzLangLib {
         }
 
         void EmitCreate(ObjectSymbol objsym, Direction direction = Direction.None) {
-            if (!objsym.IsObject || objsym.ObjectIds.Count() == 0) throw Error.Assert(objsym.Name);
+            if (!objsym.IsObject || objsym.ObjectIds.Count() == 0)
+                throw Error.Assert(objsym.Name);
             _gen.Emit(Opcodes.CreateO);
             _gen.Emit(objsym);
             _gen.Emit(direction);
@@ -559,7 +579,8 @@ namespace PuzzLangLib {
         }
 
         void EmitDestroy(ObjectSymbol objsym) {
-            if (!objsym.IsObject || objsym.ObjectIds.Count() == 0) throw Error.Assert(objsym.Name);
+            if (!objsym.IsObject || objsym.ObjectIds.Count() == 0)
+                throw Error.Assert(objsym.Name);
             _gen.Emit(Opcodes.DestroyO);
             _gen.Emit(objsym);
         }
@@ -572,7 +593,8 @@ namespace PuzzLangLib {
         }
 
         void EmitCreateByRef(ObjectSymbol objsym, Direction direction) {
-            if (objsym.ObjectIds.Count() != 1) throw Error.Assert(objsym.Name);
+            if (objsym.ObjectIds.Count() != 1)
+                throw Error.Assert(objsym.Name);
             _gen.Emit(Opcodes.CreateO);
             _gen.Emit(~objsym.ObjectIds.First()); // special to trigger variable lookup
             _gen.Emit(direction);
@@ -621,7 +643,8 @@ namespace PuzzLangLib {
         }
 
         void EmitStoreRef(int trailvarid, IList<int> objectids) {
-            if (objectids.Count == 0) throw Error.Assert("trail");
+            if (objectids.Count == 0)
+                throw Error.Assert("trail");
             _gen.Emit(Opcodes.StoreXO);
             _gen.Emit(trailvarid);
             _gen.Emit(objectids);
@@ -633,14 +656,18 @@ namespace PuzzLangLib {
             if (objsym != null) {
                 _gen.Emit(Opcodes.CommandCSO);
                 _gen.Emit((int)command);
-                if (call == null) _gen.Emit(argument);
-                else _gen.Emit(-99);
+                if (call == null)
+                    _gen.Emit(argument);
+                else
+                    _gen.Emit(-99);
                 _gen.Emit(objsym);
             } else if (argument != null) {
                 _gen.Emit(Opcodes.CommandCS);
                 _gen.Emit((int)command);
-                if (call == null) _gen.Emit(argument);
-                else _gen.Emit(-99);
+                if (call == null)
+                    _gen.Emit(argument);
+                else
+                    _gen.Emit(-99);
             } else {
                 _gen.Emit(Opcodes.CommandC);
                 _gen.Emit((int)command);

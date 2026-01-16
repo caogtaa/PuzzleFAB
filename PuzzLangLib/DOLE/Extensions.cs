@@ -33,13 +33,15 @@ namespace DOLE {
         // truncate a string if too long
         public static string Shorten(this string argtext, int len) {
             var text = argtext.Replace('\n', '.').Replace('\r', '.');
-            if (text.Length <= len) return text;
+            if (text.Length <= len)
+                return text;
             return text.Substring(0, len - 3) + "...";
         }
 
         public static string ShortenLeft(this string argtext, int len) {
             var text = argtext.Replace('\n', '.');
-            if (text.Length <= len) return text;
+            if (text.Length <= len)
+                return text;
             return "..." + text.Substring(text.Length - len + 3);
         }
 
@@ -122,30 +124,37 @@ namespace DOLE {
                 n => n.Equals(s, StringComparison.InvariantCultureIgnoreCase));
             if (index >= 0)
                 return (Enum.GetValues(typeof(T)) as T[])[index];
-            else return null;
+            else
+                return null;
         }
 
         // Simplistic manipulation of MultiDictionary
         public static void AddMulti<T, U>(this Dictionary<T, List<U>> dict, T key, U item) {
             List<U> value;
-            if (dict.TryGetValue(key, out value)) value.Add(item);
-            else dict.Add(key, new List<U> { item });
+            if (dict.TryGetValue(key, out value))
+                value.Add(item);
+            else
+                dict.Add(key, new List<U> { item });
         }
 
         public static List<U> GetMulti<T, U>(this Dictionary<T, List<U>> dict, T key) {
             List<U> value;
-            if (dict.TryGetValue(key, out value)) return value;
-            else return null;
+            if (dict.TryGetValue(key, out value))
+                return value;
+            else
+                return null;
         }
 
         public static U SafeLookup<T, U>(this Dictionary<T, U> dict, T key, U other = default(U)) {
             U ret;
-            if (dict.TryGetValue(key, out ret)) return ret;
+            if (dict.TryGetValue(key, out ret))
+                return ret;
             return other;
         }
 
         public static bool SafeAdd<T, U>(this Dictionary<T, U> dict, T key, U value) {
-            if (dict.ContainsKey(key)) return false;
+            if (dict.ContainsKey(key))
+                return false;
             dict.Add(key, value);
             return true;
         }

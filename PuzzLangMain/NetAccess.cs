@@ -65,7 +65,8 @@ namespace PuzzLangMain {
         // Load a PS game as a piece of JSON given a gist id
         static internal string LoadGist(string id) {
             var json = LoadJson(id);
-            if (json == null) return null;
+            if (json == null)
+                return null;
             var pjson = JSON.Parse(json);
             Logger.WriteLine(0, "test {0}", pjson[""]);
             return pjson["files"]["script.txt"]["content"];

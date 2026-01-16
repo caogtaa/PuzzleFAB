@@ -83,7 +83,8 @@ namespace PuzzLangLib {
                     }
 
                     sw.Write(seenlookup[name] + ",");
-                    if (++linebreak % level.Width == 0) sw.Write("\n");
+                    if (++linebreak % level.Width == 0)
+                        sw.Write("\n");
                 }
             }
 
@@ -97,7 +98,8 @@ namespace PuzzLangLib {
                 .Where(s => s.Name.Length == 1)
                 .ToDictionary(k => k.ObjectIds.OrderBy(i => i).Join(), v => v.Name);
             for (int x = 0; x < level.Length; x++) {
-                if (x > 0 && x % level.Width == 0) sw.Write(" ;");
+                if (x > 0 && x % level.Width == 0)
+                    sw.Write(" ;");
                 var objs = level.GetObjects(x).OrderBy(i => i);
                 var objsexbg = (objs.Count() == 1) ? objs : objs.Skip(1);
                 sw.Write(lookup.SafeLookup(objsexbg.Join()) ?? "?");

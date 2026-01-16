@@ -56,7 +56,8 @@ namespace PuzzLangLib {
             if (_arguments == null) {
                 gen.Emit(Opcodes.LoadT);
                 gen.Emit(_name);
-            } else EmitFunc(gen);
+            } else
+                EmitFunc(gen);
         }
 
         private void EmitFunc(Generator gen) {
@@ -203,7 +204,8 @@ namespace PuzzLangLib {
 
         // Called before game starts
         internal void SetModel(GameModel model) {
-            if (scriptMain == null) return;
+            if (scriptMain == null)
+                return;
             gameModel = model;
             //UserData.RegisterType(typeof(WrapLevel));
             //scriptMain.Globals["level"] = UserData.Create(new WrapLevel { scriptManager = this });
@@ -211,7 +213,8 @@ namespace PuzzLangLib {
 
         // Called when new game state created
         internal ScriptState GetScriptState(GameState gamestate) {
-            if (scriptMain == null) return null;
+            if (scriptMain == null)
+                return null;
             // create new table with content copied from parent
             var vartable = new Table(scriptMain);
             var parent = (gamestate.Parent == null) ? _vartable : gamestate.Parent.ScriptState.varTable;

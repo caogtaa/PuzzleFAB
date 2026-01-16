@@ -64,31 +64,36 @@ namespace PuzzLangLib {
 
         int GetInt() {
             var ret = RuleCode.Code[_gpc++];
-            if (_logging) _sw.Write("{0} ", ret);
+            if (_logging)
+                _sw.Write("{0} ", ret);
             return ret;
         }
 
         bool GetBool() {
             var ret = (RuleCode.Code[_gpc++] != 0);
-            if (_logging) _sw.Write("{0} ", ret);
+            if (_logging)
+                _sw.Write("{0} ", ret);
             return ret;
         }
 
         MatchOperator GetOper() {
             var ret = (MatchOperator)RuleCode.Code[_gpc++];
-            if (_logging) _sw.Write("{0} ", ret);
+            if (_logging)
+                _sw.Write("{0} ", ret);
             return ret;
         }
 
         Direction GetDir() {
             var ret = (Direction)RuleCode.Code[_gpc++];
-            if (_logging) _sw.Write("{0} ", ret);
+            if (_logging)
+                _sw.Write("{0} ", ret);
             return ret;
         }
 
         CommandName GetCmd() {
             var ret = (CommandName)RuleCode.Code[_gpc++];
-            if (_logging) _sw.Write("{0} ", ret);
+            if (_logging)
+                _sw.Write("{0} ", ret);
             return ret;
         }
 
@@ -109,7 +114,8 @@ namespace PuzzLangLib {
                 : new List<int>();
             while (len-- > 0)
                 list.Add(RuleCode.Code[_gpc++]);
-            if (_logging) _sw.Write("{0} ", list.Join());
+            if (_logging)
+                _sw.Write("{0} ", list.Join());
             return list;
         }
 
@@ -123,7 +129,8 @@ namespace PuzzLangLib {
                 rets = new string(array);
             }
 
-            if (_logging) _sw.Write("'{0}' ", rets);
+            if (_logging)
+                _sw.Write("'{0}' ", rets);
             return rets;
         }
 
@@ -132,7 +139,8 @@ namespace PuzzLangLib {
             var args = new List<string>();
             while (len-- > 0)
                 args.Add(GetString());
-            if (_logging) _sw.Write("{0} ", args.Join());
+            if (_logging)
+                _sw.Write("{0} ", args.Join());
             return args;
         }
 
@@ -144,7 +152,8 @@ namespace PuzzLangLib {
             _sw = new StringWriter();
             for (_gpc = 0, _break = false; _gpc < RuleCode.Code.Count && !_break;) {
                 var opcode = (Opcodes)RuleCode.Code[_gpc++];
-                if (_logging) _sw.Write("--- {0,3}: {1} ", _gpc, opcode);
+                if (_logging)
+                    _sw.Write("--- {0,3}: {1} ", _gpc, opcode);
                 switch (opcode) {
                     case Opcodes.Start:
                         _break = State.OpStart();
@@ -255,11 +264,14 @@ namespace PuzzLangLib {
                         throw Error.Assert("bad opcode: {0}", opcode);
                 }
 
-                if (_logging) Logger.WriteLine(LogEval, _sw.ToString());
-                if (_logging) _sw.GetStringBuilder().Length = 0;
+                if (_logging)
+                    Logger.WriteLine(LogEval, _sw.ToString());
+                if (_logging)
+                    _sw.GetStringBuilder().Length = 0;
             }
 
-            if (_logging) Logger.WriteLine(LogEval, "[Run ret={0}]", _break);
+            if (_logging)
+                Logger.WriteLine(LogEval, "[Run ret={0}]", _break);
             return _break;
         }
     }

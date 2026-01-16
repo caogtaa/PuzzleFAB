@@ -196,9 +196,12 @@ namespace PuzzLangLib {
 
         // execute with string inputs
         public bool Execute(string levelno, string inputs) {
-            if (!Ok) return false;
-            if (!LoadLevel(levelno.SafeIntParse() ?? 0)) return false;
-            if (inputs != null && inputs != "") AcceptInputs(inputs);
+            if (!Ok)
+                return false;
+            if (!LoadLevel(levelno.SafeIntParse() ?? 0))
+                return false;
+            if (inputs != null && inputs != "")
+                AcceptInputs(inputs);
             Logger.WriteLine(2, "Done ok={0}", Ok);
             return Ok;
         }
@@ -220,19 +223,24 @@ namespace PuzzLangLib {
             try {
                 var split = input.SplitTrim(" ");
                 var inevent = split[0].SafeEnumParse<InputEvent>() ?? InputEvent.None;
-                if (inevent == InputEvent.None) throw Error.Argument("Bad input: '{0}'".Fmt(input));
+                if (inevent == InputEvent.None)
+                    throw Error.Argument("Bad input: '{0}'".Fmt(input));
                 var inparam = (split.Count > 1) ? split[1].SafeIntParse() : null;
                 AcceptEvent(inevent, inparam);
 
-                if (Sounds.Any()) Logger.WriteLine(1, "# Sounds: {0}", Sounds.Join());
-                if (_messages.Any()) Logger.WriteLine(1, "# Messages: {0}", _messages.Join());
-                if (Logger.Level >= 2) ShowLevel("input");
+                if (Sounds.Any())
+                    Logger.WriteLine(1, "# Sounds: {0}", Sounds.Join());
+                if (_messages.Any())
+                    Logger.WriteLine(1, "# Messages: {0}", _messages.Join());
+                if (Logger.Level >= 2)
+                    ShowLevel("input");
             } catch (Exception ex) {
                 _messages.Insert(0, "Error: {0}".Fmt(ex.Message));
                 VerboseLog("{0}", _messages.First());
                 if (ex is DOLEException)
                     Logger.WriteLine("*** '{0}': runtime error: {1}", _sourcename, ex.Message);
-                else Logger.WriteLine("*** '{0}': runtime exception: {1}", _sourcename, ex.ToString());
+                else
+                    Logger.WriteLine("*** '{0}': runtime exception: {1}", _sourcename, ex.ToString());
                 _modelstate = ModelState.Failed;
             }
         }
@@ -245,18 +253,21 @@ namespace PuzzLangLib {
         internal void VerboseLog(string format, params object[] args) {
             if (GameDef.GetSetting(OptionSetting.verbose_logging, false))
                 _verboselog.Add(String.Format(format, args));
-            else Logger.WriteLine(1, "% " + format, args);
+            else
+                Logger.WriteLine(1, "% " + format, args);
         }
 
         internal void VerboseLogFlush() {
             var last = _verboselog.FirstOrDefault();
             var count = 1;
             foreach (var line in _verboselog.Concat(new string[1]).Skip(1)) {
-                if (line == last) ++count;
+                if (line == last)
+                    ++count;
                 else {
                     if (count > 1)
                         _out.WriteLine(last + " x{0}", count);
-                    else _out.WriteLine(last);
+                    else
+                        _out.WriteLine(last);
                     last = line;
                     count = 1;
                 }
@@ -268,7 +279,8 @@ namespace PuzzLangLib {
         internal void StatsLog(string format, params object[] args) {
             if (GameDef.GetSetting(OptionSetting.statistics_logging, false))
                 _out.WriteLine(String.Format(format, args));
-            else Logger.WriteLine(1, "% " + format, args);
+            else
+                Logger.WriteLine(1, "% " + format, args);
         }
 
         public void ShowLevel(string message) {
@@ -276,7 +288,8 @@ namespace PuzzLangLib {
                 Logger.WriteLine(0, "Level message: {0}", CurrentMessage);
             else if (InLevel)
                 ShowLevel(message, CurrentLevel);
-            else Logger.WriteLine(0, "Level status: {0}", _modelstate);
+            else
+                Logger.WriteLine(0, "Level status: {0}", _modelstate);
         }
 
         // show all objects in level using sorted integers
@@ -376,7 +389,8 @@ namespace PuzzLangLib {
 
         // input event requires application of rules to determine next state
         void SetNextState(InputEvent input, int? intparam) {
-            if (_modelstate == ModelState.Level && !IsValidInGame(input)) return;
+            if (_modelstate == ModelState.Level && !IsValidInGame(input))
+                return;
 
             // model state determines what to do with input
             switch (_modelstate) {
@@ -385,9 +399,11 @@ namespace PuzzLangLib {
                     ApplyRules(input, intparam);
                     if (_states.Last().IsAgaining) {
                         _modelstate = ModelState.Againing;
-                        if (GameDef.GetSetting(OptionSetting.pause_on_again, false)) break;
+                        if (GameDef.GetSetting(OptionSetting.pause_on_again, false))
+                            break;
                         while (_states.Last().IsAgaining) {
-                            if (Logger.Level >= 3) ShowLevel("againing");
+                            if (Logger.Level >= 3)
+                                ShowLevel("againing");
                             ApplyRules(InputEvent.Tick, null);
                         }
                     }
@@ -419,7 +435,8 @@ namespace PuzzLangLib {
                 _modelstate = ModelState.Level;
             else if (GameDef.GetSetting(OptionSetting.pause_at_end_level, false))
                 _modelstate = ModelState.EndLevel;
-            else LoadLevel(_levelindex + 1);
+            else
+                LoadLevel(_levelindex + 1);
         }
 
         // test whether this input is permitted in this game
@@ -487,7 +504,8 @@ namespace PuzzLangLib {
                 case StateResult.Cancel:
                     VerboseLog("Cancel, keep current state");
                     CheckTrigger(SoundTrigger.Cancel);
-                    if (currentstate.IsAgaining) _states.Remove(currentstate);
+                    if (currentstate.IsAgaining)
+                        _states.Remove(currentstate);
                     break; // as if nothing happened
                 case StateResult.Restart:
                     VerboseLog("Restart from checkpoint");
@@ -508,9 +526,11 @@ namespace PuzzLangLib {
                     LoadLevel(_levelindex);
                     break;
                 case StateResult.Againing:
-                    if (currentstate.IsAgaining) _states.Remove(currentstate);
+                    if (currentstate.IsAgaining)
+                        _states.Remove(currentstate);
                     newstate.AgainCount = currentstate.AgainCount + 1;
-                    if (newstate.AgainCount >= 100) throw Error.Fatal("too many agains");
+                    if (newstate.AgainCount >= 100)
+                        throw Error.Fatal("too many agains");
                     VerboseLog("Run rules again on current state");
                     CheckTrigger(SoundTrigger.Again);
                     Logger.WriteLine(2, "Again count {0}", newstate.AgainCount);
@@ -549,11 +569,13 @@ namespace PuzzLangLib {
             }
 
             VerboseLog("Load level={0}", levelindex);
-            if (levelindex < 0) return false;
+            if (levelindex < 0)
+                return false;
             _levelindex = levelindex;
             if (_levelindex >= GameDef.LevelIndex.Count) {
                 _modelstate = ModelState.Finished;
-                if (Logger.Level >= 2) ShowLevel("loadlevel");
+                if (Logger.Level >= 2)
+                    ShowLevel("loadlevel");
                 CheckTrigger(SoundTrigger.Endgame);
             } else {
                 var levelinfo = GameDef.LevelIndex[_levelindex];
@@ -565,7 +587,8 @@ namespace PuzzLangLib {
                     var level = GameDef.Levels[levelinfo.Item2];
                     _states = new List<GameState> { GameState.Create(this, level, null) };
                     _modelstate = ModelState.Level;
-                    if (Logger.Level >= 2) ShowLevel("loadlevel");
+                    if (Logger.Level >= 2)
+                        ShowLevel("loadlevel");
                     SetCheckpoint(CurrentLevel);
                     if (GameDef.GetSetting(OptionSetting.run_rules_on_level_start, false))
                         AcceptInputs("init");
