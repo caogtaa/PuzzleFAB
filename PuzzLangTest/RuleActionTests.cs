@@ -699,5 +699,35 @@ namespace PuzzLangTest {
 
             DoTests("PRBG", "", template, tests, DoTestSymbols);
         }
+        
+        [TestMethod]
+        public void RGBGameValidate() {
+            // 简单测试下RGB地图的语法错误
+            var tests = new [,] {
+                { "",                         "0; right; . B P R . end" },
+                { "",                         "5; right; . . G . . end" },
+                { "right",                    "0; right; . B . P R end" },
+                { "right",                    "5; right; . . G . . end" },
+                { "left",                     "0; right; B P . R . end" },
+                { "left",                     "5; right; . . G . . end" },
+            };
+        
+            DoTests("RGB1", "", "", tests, DoTestSymbols);
+            DoTests("RGB3", "", "", tests, DoTestSymbols);
+        }
+        
+        [TestMethod]
+        public void GeneratePlayer() {
+            // 箱子被推过的地方产生一个新的P
+            var args =
+                "@(rul):[ > P | R ] -> [ P | > R ];" +      // P推动R时自己不动
+                       "[ > R ]     -> [ > R P ];" +        // R移动时原位置产生新P
+                "@(lev):.PR..;";
+            var tests = new [,] {
+                { "right",                    "0; right; . P P R . end" },
+            };
+        
+            DoTests("RGB3", "", args, tests, DoTestSymbols);
+        }
     }
 }

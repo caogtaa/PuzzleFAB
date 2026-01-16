@@ -115,12 +115,13 @@ namespace PuzzLangLib {
         /// <param name="ids"></param>
         /// <returns></returns>
         public string ObjectIdsToSymbol(IList<int> ids) {
-            var sw = new StringWriter();
+            // 此处排除Property是排除了OR连接
             var lookup = _parser.Symbols
-                .Where(s => s.Name.Length == 1)
+                .Where(s => s.Name.Length == 1 && s.Kind != SymbolKind.Property)
                 .ToDictionary(k => k.ObjectIds.OrderBy(i => i).Join(), v => v.Name);
 
-            return lookup.SafeLookup(ids.OrderBy(i => i).Join()) ?? "?";
+            var idsExcludeBg = (ids.Count() == 1) ? ids : ids.Skip(1);
+            return lookup.SafeLookup(idsExcludeBg.OrderBy(i => i).Join()) ?? "?";
         }
 
         /// <summary>

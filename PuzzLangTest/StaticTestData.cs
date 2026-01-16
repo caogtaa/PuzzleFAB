@@ -42,7 +42,7 @@ namespace PuzzLangTest {
         public string Inputs;
     }
 
-    public static class StaticTestData {
+    public static partial class StaticTestData {
         const string Crlf = "\r\n";
         static readonly char[] Colon = new char[] { ':' };
 
@@ -69,6 +69,18 @@ namespace PuzzLangTest {
                         BodyTemplate = _template_ext,
                         SectionArgs = _game_prbg_ext,
                         Inputs = "right",
+                    },
+                    new Preset {
+                        CaseName = "RGB1-layer",
+                        PreludeTemplate = _extraprelude,
+                        BodyTemplate = _template,
+                        SectionArgs = _rgb1Layer,
+                    },
+                    new Preset {
+                        CaseName = "RGB3-layers",
+                        PreludeTemplate = _extraprelude,
+                        BodyTemplate = _template,
+                        SectionArgs = _rgb3Layers,
                     },
                     //new Preset { "Simple Block Pushing", _sbp, null, null, "right" },
                     //new Preset { "PRBG filled", _extraprelude, _template, _game_prbg, "right" },
@@ -104,7 +116,7 @@ namespace PuzzLangTest {
                 ? preset.SectionArgs
                 : SubstituteArgs(preset.SectionArgs, newSectionArgs);
 
-            // 主体为空，只保留前导节？
+            // 主体为空，只保留前导节？其实是前导节已经包含了主体内容
             var script = string.IsNullOrEmpty(finalSectionArgs)
                 ? preset.PreludeTemplate
                 : MakeScript(title ?? preset.CaseName, preset.PreludeTemplate, preset.BodyTemplate, finalSectionArgs);

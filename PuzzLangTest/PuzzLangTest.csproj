@@ -65,6 +65,7 @@
     <Compile Include="JsonTestData.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="StaticTestData+LevelPack.cs" />
     <Compile Include="TestCommon.cs" />
     <Compile Include="RuleExtensionsTests.cs" />
     <Compile Include="RuleCommandTests.cs" />
