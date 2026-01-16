@@ -113,13 +113,17 @@ namespace PuzzLangTest {
         Inputs = preset.Inputs,
       };
     }
+    
+    private static string[] SplitAndRemoveEmpty(this string str, char sep) {
+      return str.Split(new[] { sep }, StringSplitOptions.RemoveEmptyEntries);
+    }
 
     private static string SubstituteArgs(string subs, string newsubs) {
       if (string.IsNullOrEmpty(subs))
         return newsubs;
 
-      var lookup = subs.Split('@').ToDictionary(t => t.Substring(0,5), t => t);
-      foreach (var s in newsubs.Split('@').Where(s => s.Length >= 4))
+      var lookup = subs.SplitAndRemoveEmpty('@').ToDictionary(t => t.Substring(0,5), t => t);
+      foreach (var s in newsubs.SplitAndRemoveEmpty('@').Where(s => s.Length >= 4))
         lookup[s.Substring(0, 5)] = s;
       return lookup.Values.Join("@");
     }
@@ -136,7 +140,7 @@ namespace PuzzLangTest {
       var script = String.Format(prelude, title) + template;
       //var game = template.Replace("(pre)", String.Format(prelude, title));
       // split args on ...@(sec)subs@... then 
-      var argsInList = args.Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries);
+      var argsInList = args.SplitAndRemoveEmpty('@');
       foreach (var arg in argsInList) {
         var parts = arg.Split(new char[] { ':' }, 2);
         script = script.Replace(parts[0], parts[1]);
@@ -149,7 +153,7 @@ namespace PuzzLangTest {
 
     // Simple game using template substitutions
     static string _game_prbg =
-       "(pre):;" +
+      "@(pre):;" +
       "@(obj):Background;black;;PLAYER P;white;;R;RED;;B;BLUE;;G;green;;Y;yellow;;K;Pink;;" +
       "@(leg):. = Background;a = R and K;o = R or G or B or Y;ork = R or K;oyk = Y or K;obk = B or K" +
       "@(col):Background;Y;Player,R,B,G;K;" +
@@ -159,7 +163,7 @@ namespace PuzzLangTest {
 
     // Ditto with extensions
     static string _game_prbg_ext =
-       "(pre):;" +
+      "@(pre):;" +
       "@(obj):Background;black;;PLAYER P;white;;R;RED;;B;BLUE;;G;green;;Y;yellow;;K;Pink;;S;purple;text SSS" +
       "@(leg):. = Background;a = R and K;o = R or G or B or Y;ork = R or K;oyk = Y or K" +
       "@(col):Background;Y;Player,R,B,G;K;S;" +

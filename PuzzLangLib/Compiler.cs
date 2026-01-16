@@ -91,6 +91,44 @@ namespace PuzzLangLib {
       return sw.ToString();
     }
 
+    /// <summary>
+    /// 尝试找到一个单字符symbol来表示给定的object id列表，如果不存在这样的symbol则返回'?'
+    /// NOTE: 这个方法比较慢，只在UT里使用
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    public string ObjectIdsToSymbol(IList<int> ids) {
+      var sw = new StringWriter();
+      var lookup = _parser.Symbols
+        .Where(s => s.Name.Length == 1)
+        .ToDictionary(k => k.ObjectIds.OrderBy(i => i).Join(), v => v.Name);
+      
+      return lookup.SafeLookup(ids.OrderBy(i => i).Join()) ?? "?";
+    }
+
+    /// <summary>
+    /// 比较object id列表和一个symbole列表，判断是否等价，忽略顺序和重复
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <param name="symbols"></param>
+    /// <param name="ignoreBg">是否忽略背景符号</param>
+    /// <returns></returns>
+    public bool SymbolEquals(IList<int> ids, string symbols, bool ignoreBg = true) {
+      var ids1 = ids.ToHashSet();
+      var ids2 = new HashSet<int>();
+      foreach (var c in symbols) {
+        ids2.UnionWith(_parser.ParseAggregate(c.ToString()));
+      }
+
+      if (ignoreBg) {
+        var bgSymbol = _parser.ParseSymbol("Background");
+        ids1.ExceptWith(bgSymbol.ObjectIds);
+        ids2.ExceptWith(bgSymbol.ObjectIds);
+      }
+
+      return ids1.SetEquals(ids2);
+    }
+
     void Compile(TextReader reader) {
       _parser = ParseManager.Create(SourceName, Out, Settings);
       var program = reader.ReadToEnd() + "\r\n";  // just too hard to parse missing EOL

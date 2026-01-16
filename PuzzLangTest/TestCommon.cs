@@ -120,6 +120,44 @@ namespace PuzzLangTest {
         location = model.Step(location ?? 0, direction);
       }
     }
+    
+    protected void DoTestSymbols(Compiler compiled, string inputs, string predicts, string moreInfo) {
+      var model = compiled.Model;
+      model.AcceptInputs("level 0," + inputs);
+      var modelResult = DecodeResult(model);
+      
+      var ts = predicts.Split(';');
+      var location = ts[0].SafeIntParse();    // TODO: 这里没有马上验证是否出界，有缺陷
+      var direction = ts[1].Trim();
+      var symbols = ts[2].Trim().Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+      
+      for (int i = 0; i < symbols.Length; i++) {
+        string specialToken = string.Empty;
+        if (modelResult != null) {
+          // 特殊状态，解析错误或者游戏状态变化
+          specialToken = modelResult;
+        } else if (location == null) {
+          // 移动结束
+          specialToken = "end";
+        }
+
+        if (string.IsNullOrEmpty(specialToken)) {
+          // 比较对象符号
+          var ids = model.GetObjects(location.Value);
+          if (!compiled.SymbolEquals(ids, symbols[i])) {
+            Assert.Fail($"{moreInfo}; " +
+                        $"At location {location.Value}: " +
+                        $"\"{compiled.ObjectIdsToSymbol(ids)}\" <-> \"{symbols[i]}\"");
+          }
+        } else {
+          // 比较特殊字段
+          Assert.AreEqual(symbols[i], specialToken, moreInfo);
+        }
+
+        // immutable调用，出界时location = null
+        location = model.Step(location ?? 0, direction);
+      }
+    }
 
     string DecodeResult(GameModel model) {
       var result = (!model.Ok) ? "error"

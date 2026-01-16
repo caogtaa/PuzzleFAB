@@ -63,6 +63,8 @@ namespace PuzzLangTest {
               "[p|a]->[|];" +  // compile but never match
         "@(lev):.....;.....;R.P.R;.....;..R.." +
         "@(win):";
+      
+      // 游戏内O = R or G or B or Y。所以对于不同的variations，预期的结果都是一致的
       var variations = "R;O";
       var tests = new string[,] {
         { "",                         "10; right; 13 1  12 1  13 end" },
@@ -644,6 +646,58 @@ namespace PuzzLangTest {
       };
 
       DoTests("PRBG", "", template, tests, DoTestLocationValue);
+    }
+    
+    [TestMethod]
+    public void Vanish() {
+      // P碰撞到R时两者消失，规则限制右向匹配
+      var template =
+        "@(rul):right [ > P | R ] -> [ | ];" +
+        "@(lev):.P.R.;" +
+        "@(win):;";
+      var tests = new [,] {
+        { "right",                    "0; right; . . P R . end" },
+        { "right,right",              "0; right; . . . . . end" },
+        { "left,right",               "0; right; . P . R . end" },
+        { "down",                     "0; right; . P . R . end" },
+      };
+
+      DoTests("PRBG", "", template, tests, DoTestSymbols);
+    }
+    
+    [TestMethod]
+    public void Blocker() {
+      // 推力无法传递，P推R时R前有阻挡物则无法推动
+      var template =
+        "@(rul):right [ > P | R ] -> [ > P | > R ];" +
+        "@(lev):.PRR.;" +
+        "@(win):;";
+      var tests = new [,] {
+        { "right",                    "0; right; . P R R . end" },
+        { "right,right",              "0; right; . P R R . end" },
+        { "left",                     "0; right; P . R R . end" },
+        { "left,right",               "0; right; . P R R . end" },
+      };
+
+      DoTests("PRBG", "", template, tests, DoTestSymbols);
+    }
+    
+    [TestMethod]
+    public void PassMovement() {
+      // 推力传递
+      var template =
+        "@(rul):right [ > P | R ] -> [ > P | > R ];" +
+               "right [ > R | R ] -> [ > R | > R ];" +
+        "@(lev):.PRR.;" +
+        "@(win):;";
+      var tests = new [,] {
+        { "right",                    "0; right; . . P R R end" },
+        { "right,right",              "0; right; . . P R R end" },
+        { "left",                     "0; right; P . R R . end" },
+        { "left,right",               "0; right; . P R R . end" },
+      };
+
+      DoTests("PRBG", "", template, tests, DoTestSymbols);
     }
   }
 }
