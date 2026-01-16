@@ -729,5 +729,25 @@ namespace PuzzLangTest {
         
             DoTests("RGB3", "", args, tests, DoTestSymbols);
         }
+        
+        [TestMethod]
+        public void Bug_IDKGNM() {
+            // 箱子被推过的地方产生一个新的P
+            var args =
+                "@(rul):[ > P | R G ] -> [ P | ^ R v G ];" +      // P推动Y时，R、G分离
+                       "[ parallel R parallel G ] -> [ parallel R parallel G up P ];" +   // RG分离产生新P，新P上移
+                "@(lev):.....;"+
+                       "..Y..;"+
+                       "..P..;";
+            var tests = new [,] {
+                { "up",                    "0; right; . . P . . end" },
+                { "up",                    "5; right; . R . G . end" },
+                { "up",                    "10;right; . . P . . end" },
+            };
+        
+            DoTests("RGB3", "", args, tests, DoTestSymbols);
+            
+            
+        }
     }
 }
